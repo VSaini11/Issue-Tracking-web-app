@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Test Login Flow</h1>
+    <button onclick="testLogin()">Test Admin Login</button>
+    <div id="output"></div>
+
+    <script>
+        async function testLogin() {
+            const output = document.getElementById('output');
+            output.innerHTML = 'Testing login...';
+            
+            try {
+                // Test login
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'admin@company.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                output.innerHTML += '<br>Login response: ' + JSON.stringify(data);
+                
+                if (response.ok) {
+                    output.innerHTML += '<br>Login successful! User: ' + data.user.role;
+                    
+                    // Test auth check
+                    setTimeout(async () => {
+                        try {
+                            const authResponse = await fetch('/api/auth/me', {
+                                credentials: 'include'
+                            });
+                            
+                            const authData = await authResponse.json();
+                            output.innerHTML += '<br>Auth check: ' + JSON.stringify(authData);
+                            
+                            if (authResponse.ok) {
+                                output.innerHTML += '<br>Should redirect to: /' + authData.user.role + '-dashboard';
+                                
+                                // Try to redirect manually
+                                output.innerHTML += '<br>Attempting redirect...';
+                                window.location.href = '/' + authData.user.role + '-dashboard';
+                            }
+                        } catch (authError) {
+                            output.innerHTML += '<br>Auth check error: ' + authError.message;
+                        }
+                    }, 1000);
+                } else {
+                    output.innerHTML += '<br>Login failed: ' + data.error;
+                }
+                
+            } catch (error) {
+                output.innerHTML += '<br>Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
