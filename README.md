@@ -209,7 +209,7 @@ Create a `.env.local` file with the following variables:
 
 ```env
 # MongoDB Connection
-MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/Issue-tracking?retryWrites=true&w=majority"
+MONGODB_URI=""
 
 # JWT Secret (use a strong random string in production)
 JWT_SECRET="your-secret-key-here-change-in-production"
