@@ -50,12 +50,12 @@ export const useAuth = () => {
 
       if (response.ok) {
         setUser(data.user)
-        
+
         // Force a re-check of auth to ensure user is properly set
         setTimeout(() => {
           checkAuth()
         }, 100)
-        
+
         return { success: true }
       } else {
         return { success: false, error: data.error }
@@ -66,24 +66,24 @@ export const useAuth = () => {
     }
   }
 
-  const register = async (email: string, password: string, role: string, name: string, department?: string) => {
+  const register = async (email: string, password: string, role: string, name: string, department?: string, categories?: string[]) => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role, name, department }),
+        body: JSON.stringify({ email, password, role, name, department, categories }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
         setUser(data.user)
-        
+
         // Let the main page handle redirection
         // Don't redirect here to avoid race conditions
-        
+
         return { success: true }
       } else {
         return { success: false, error: data.error }

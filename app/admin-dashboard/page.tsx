@@ -40,7 +40,6 @@ export default function AdminDashboard() {
     isActive: boolean;
     createdAt: string;
   }[]>([])
-  const [assignTo, setAssignTo] = useState("")
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [deleteUserConfirmId, setDeleteUserConfirmId] = useState<string | null>(null)
 
@@ -90,15 +89,13 @@ export default function AdminDashboard() {
 
     const updates: Record<string, string> = {}
     if (newStatus) updates.status = newStatus
-    if (assignTo) updates.assignedTo = assignTo
 
     const result = await updateIssue(selectedIssue._id, updates)
-    
+
     if (result.success) {
       setIsUpdateDialogOpen(false)
       setSelectedIssue(null)
       setNewStatus("")
-      setAssignTo("")
     }
   }
 
@@ -117,7 +114,7 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         const data = await response.json()
-        
+
         // Refresh the users list
         const refreshResponse = await fetch('/api/users')
         if (refreshResponse.ok) {
@@ -131,7 +128,7 @@ export default function AdminDashboard() {
         } else if (data.type === 'activated') {
           alert('User has been activated successfully')
         }
-        
+
         setDeleteUserConfirmId(null)
       } else {
         const error = await response.json()
@@ -422,7 +419,6 @@ export default function AdminDashboard() {
                                 onClick={() => {
                                   setSelectedIssue(issue)
                                   setNewStatus(issue.status)
-                                  setAssignTo(issue.assignedTo?._id || "")
                                   setIsUpdateDialogOpen(true)
                                 }}
                                 className="text-blue-600 border-blue-200 hover:bg-blue-50"
@@ -501,8 +497,8 @@ export default function AdminDashboard() {
                               size="sm"
                               onClick={() => setDeleteUserConfirmId(userItem._id)}
                               className={
-                                userItem.isActive 
-                                  ? "text-red-600 border-red-200 hover:bg-red-50" 
+                                userItem.isActive
+                                  ? "text-red-600 border-red-200 hover:bg-red-50"
                                   : "text-green-600 border-green-200 hover:bg-green-50"
                               }
                               disabled={userItem._id === user.id} // Disable for current user
@@ -558,23 +554,6 @@ export default function AdminDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Assign To</label>
-                  <Select value={assignTo} onValueChange={setAssignTo}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select team member" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
-                      {users.filter(u => ['team', 'admin'].includes(u.role)).map((userItem) => (
-                        <SelectItem key={userItem._id} value={userItem._id}>
-                          {userItem.name} ({userItem.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
               <div className="flex justify-end space-x-3">
@@ -603,7 +582,7 @@ export default function AdminDashboard() {
             <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={() => deleteConfirmId && handleDeleteIssue(deleteConfirmId)}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
@@ -618,14 +597,14 @@ export default function AdminDashboard() {
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle>
-              {deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive 
-                ? "Deactivate User" 
+              {deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive
+                ? "Deactivate User"
                 : "Activate User"
               }
             </DialogTitle>
             <DialogDescription>
-              {deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive 
-                ? "Are you sure you want to deactivate this user? They will be unable to log in and will be unassigned from any current issues." 
+              {deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive
+                ? "Are you sure you want to deactivate this user? They will be unable to log in and will be unassigned from any current issues."
                 : "Are you sure you want to activate this user? They will be able to log in and access the system again."
               }
             </DialogDescription>
@@ -634,7 +613,7 @@ export default function AdminDashboard() {
             <Button variant="outline" onClick={() => setDeleteUserConfirmId(null)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={() => deleteUserConfirmId && handleToggleUserStatus(deleteUserConfirmId)}
               className={
                 deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive
@@ -642,8 +621,8 @@ export default function AdminDashboard() {
                   : "bg-green-600 hover:bg-green-700 text-white"
               }
             >
-              {deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive 
-                ? "Deactivate User" 
+              {deleteUserConfirmId && users.find(u => u._id === deleteUserConfirmId)?.isActive
+                ? "Deactivate User"
                 : "Activate User"
               }
             </Button>

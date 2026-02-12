@@ -24,6 +24,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  categories: {
+    type: [String],
+    default: [],
+  },
   isActive: {
     type: Boolean,
     default: true,

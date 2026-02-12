@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertTriangle, Shield, BarChart3, Building2, Users, Zap } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
@@ -19,9 +20,10 @@ export default function LoginPage() {
   const [role, setRole] = useState("")
   const [name, setName] = useState("")
   const [department, setDepartment] = useState("")
+  const [categories, setCategories] = useState<string[]>([])
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  
+
   const { user, login, register, loading: authLoading } = useAuth()
   const router = useRouter()
 
@@ -30,10 +32,10 @@ export default function LoginPage() {
     if (!authLoading && user) {
       // Use both methods to ensure redirection works
       const redirectPath = `/${user.role}-dashboard`
-      
+
       // First try Next.js router
       router.replace(redirectPath)
-      
+
       // Fallback to window.location after a short delay
       setTimeout(() => {
         if (window.location.pathname === '/') {
@@ -43,17 +45,38 @@ export default function LoginPage() {
     }
   }, [user, authLoading, router])
 
+  const ALL_CATEGORIES = [
+    'Infrastructure',
+    'IT/Technical',
+    'Portal',
+    'HR',
+    'Facilities',
+    'Finance',
+    'Security',
+    'Operations',
+    'Support',
+    'Policy',
+  ]
+
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    if (checked) {
+      setCategories([...categories, category])
+    } else {
+      setCategories(categories.filter((c) => c !== category))
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
     const result = await login(email, password)
-    
+
     if (!result.success) {
       setError(result.error || "Login failed")
     }
-    
+
     setLoading(false)
   }
 
@@ -68,12 +91,12 @@ export default function LoginPage() {
       return
     }
 
-    const result = await register(email, password, role, name, department)
-    
+    const result = await register(email, password, role, name, department, categories)
+
     if (!result.success) {
       setError(result.error || "Registration failed")
     }
-    
+
     setLoading(false)
   }
 
@@ -104,7 +127,7 @@ export default function LoginPage() {
                 <p className="text-sm text-slate-600">Enterprise Issue Management System</p>
               </div>
             </div>
-            
+
           </div>
         </div>
       </header>
@@ -114,7 +137,7 @@ export default function LoginPage() {
           {/* Professional Hero Section */}
           <div className="space-y-8">
             <div className="space-y-6">
-              
+
               <h1 className="text-4xl font-bold text-slate-900 leading-tight">
                 Internal Issue Tracking
                 <span className="block text-slate-700">Management Portal</span>
@@ -229,8 +252,8 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium"
                     disabled={loading}
                   >
@@ -289,20 +312,48 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-department" className="text-slate-700 font-medium">
-                      Department (Optional)
-                    </Label>
-                    <Input
-                      id="signup-department"
-                      type="text"
-                      placeholder="IT, HR, Finance, etc."
-                      value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      className="h-12 border-slate-300 focus:border-slate-900 focus:ring-slate-900"
-                      disabled={loading}
-                    />
-                  </div>
+                  {role === 'team' ? (
+                    <div className="space-y-4">
+                      <Label className="text-slate-700 font-medium">Categories You Handle (Select at least one)</Label>
+                      <div className="grid grid-cols-2 gap-3 border border-slate-200 p-4 rounded-md">
+                        {ALL_CATEGORIES.map((category) => (
+                          <div key={category} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`cat-${category}`}
+                              checked={categories.includes(category)}
+                              onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                            />
+                            <Label htmlFor={`cat-${category}`} className="text-sm font-normal cursor-pointer leading-none">
+                              {category}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-department" className="text-slate-700 font-medium">
+                        Department (Optional)
+                      </Label>
+                      <Select value={department} onValueChange={setDepartment} disabled={loading}>
+                        <SelectTrigger className="h-12 border-slate-300 focus:border-slate-900 focus:ring-slate-900">
+                          <SelectValue placeholder="Select your department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Infrastructure">Infrastructure</SelectItem>
+                          <SelectItem value="IT/Technical">IT/Technical</SelectItem>
+                          <SelectItem value="Portal">Portal</SelectItem>
+                          <SelectItem value="Human Resources">Human Resources</SelectItem>
+                          <SelectItem value="Administration">Administration</SelectItem>
+                          <SelectItem value="Accounts / Finance">Accounts / Finance</SelectItem>
+                          <SelectItem value="Security / Compliance">Security / Compliance</SelectItem>
+                          <SelectItem value="Operations">Operations</SelectItem>
+                          <SelectItem value="Internal Helpdesk">Internal Helpdesk</SelectItem>
+                          <SelectItem value="Management">Management</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="signup-role" className="text-slate-700 font-medium">
@@ -320,8 +371,8 @@ export default function LoginPage() {
                     </Select>
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium"
                     disabled={loading}
                   >

@@ -38,7 +38,7 @@ export default function TeamDashboard() {
     email: string;
     role: string;
   }[]>([])
-  const [assignTo, setAssignTo] = useState("")
+
 
   const { user, logout, loading: authLoading } = useAuth()
   const { issues, loading: issuesLoading, fetchIssues, updateIssue } = useIssues()
@@ -86,22 +86,13 @@ export default function TeamDashboard() {
 
     const updates: Record<string, string> = {}
     if (newStatus) updates.status = newStatus
-    if (assignTo) {
-      // Handle unassigned case
-      if (assignTo === "unassigned") {
-        updates.assignedTo = ""
-      } else {
-        updates.assignedTo = assignTo
-      }
-    }
 
     const result = await updateIssue(selectedIssue._id, updates)
-    
+
     if (result.success) {
       setIsUpdateDialogOpen(false)
       setSelectedIssue(null)
       setNewStatus("")
-      setAssignTo("")
     }
   }
 
@@ -114,7 +105,8 @@ export default function TeamDashboard() {
   }) => {
     setSelectedIssue(issue)
     setNewStatus(issue.status)
-    setAssignTo(issue.assignedTo?._id || "unassigned")
+    setSelectedIssue(issue)
+    setNewStatus(issue.status)
     setIsUpdateDialogOpen(true)
   }
 
@@ -431,18 +423,16 @@ export default function TeamDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Assign To</label>
-                  <Select value={assignTo} onValueChange={setAssignTo}>
+                  <label className="text-sm font-medium">Status</label>
+                  <Select value={newStatus} onValueChange={setNewStatus}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select team member" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {users.filter(u => ['team', 'admin'].includes(u.role)).map((user) => (
-                        <SelectItem key={user._id} value={user._id}>
-                          {user.name} ({user.email})
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="Open">Open</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Resolved">Resolved</SelectItem>
+                      <SelectItem value="Closed">Closed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

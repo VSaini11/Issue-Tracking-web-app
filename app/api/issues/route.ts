@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import Issue from '@/models/Issue'
 import { verifyToken } from '@/lib/auth'
+import { sendIssueAssignedEmail, sendIssueAssignedToReporterEmail } from '@/lib/email'
+import { findBestStaffForIssue } from '@/lib/assignment'
 
 // Get all issues
 export async function GET(request: NextRequest) {
@@ -26,15 +28,15 @@ export async function GET(request: NextRequest) {
 
     // Build query based on user role
     const query: Record<string, any> = {}
-    
+
     // If client, only show their issues
     if (decoded.role === 'client') {
       query.createdBy = decoded.userId
     }
     // For team members, show issues that are relevant to them
     else if (decoded.role === 'team') {
-      // Team members see: all issues (they manage all issues)
-      // Or you could filter to only assigned issues: query.assignedTo = decoded.userId
+      // Team members can view only the issues assigned to them
+      query.assignedTo = decoded.userId
     }
     // Admin sees all issues (no additional filtering)
 
@@ -80,7 +82,19 @@ export async function POST(request: NextRequest) {
 
     await dbConnect()
 
-    const { title, description, category, priority, dueDate, tags } = await request.json()
+    const { title, description, category, priority, dueDate, tags, assignedTo } = await request.json()
+
+    let finalAssignedTo = assignedTo
+
+    // Auto-assignment logic if no staff is manually selected
+    if (!finalAssignedTo) {
+      try {
+        finalAssignedTo = await findBestStaffForIssue(category)
+      } catch (err) {
+        console.error('Auto-assignment failed:', err)
+        // Fallback to null (unassigned) if auto-assignment crashes
+      }
+    }
 
     const issue = await Issue.create({
       title,
@@ -88,11 +102,37 @@ export async function POST(request: NextRequest) {
       category,
       priority,
       createdBy: decoded.userId,
+      assignedTo: finalAssignedTo || null,
       dueDate: dueDate || null,
       tags: tags || [],
     })
 
     await issue.populate('createdBy', 'name email')
+    await issue.populate('assignedTo', 'name email')
+
+
+    // Send email notification to assigned staff
+    if (issue.assignedTo && issue.assignedTo.email) {
+      // We don't await this to prevent blocking the response
+      sendIssueAssignedEmail(
+        issue.assignedTo.email,
+        issue.assignedTo.name,
+        issue.title,
+        issue._id.toString(),
+        issue.description,
+        issue.priority
+      ).catch(err => console.error('Failed to send assignment email:', err))
+    }
+
+    // Send email notification to reporter (client/employee)
+    if (issue.createdBy && issue.createdBy.email && issue.assignedTo) {
+      sendIssueAssignedToReporterEmail(
+        issue.createdBy.email,
+        issue.createdBy.name,
+        issue.title,
+        issue.assignedTo.name
+      ).catch(err => console.error('Failed to send reporter assignment email:', err))
+    }
 
     return NextResponse.json({ issue }, { status: 201 })
   } catch (error) {

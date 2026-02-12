@@ -37,6 +37,9 @@ export default function ClientDashboard() {
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("")
   const [priority, setPriority] = useState("")
+  const [assignedTo, setAssignedTo] = useState("")
+  const [staffMembers, setStaffMembers] = useState<any[]>([])
+  const [loadingStaff, setLoadingStaff] = useState(false)
 
   const { user, logout, loading: authLoading } = useAuth()
   const { issues, loading: issuesLoading, fetchIssues, createIssue } = useIssues()
@@ -60,9 +63,54 @@ export default function ClientDashboard() {
     }
   }, [filterStatus, filterCategory, fetchIssues])
 
+  // Fetch staff members when category changes
+  useEffect(() => {
+    const fetchStaffMembers = async () => {
+      if (!category) {
+        setStaffMembers([])
+        setAssignedTo("")
+        return
+      }
+
+      setLoadingStaff(true)
+      try {
+        const response = await fetch(`/api/staff?category=${encodeURIComponent(category)}`)
+        if (response.ok) {
+          const data = await response.json()
+          setStaffMembers(data.staffMembers || [])
+        } else {
+          setStaffMembers([])
+        }
+      } catch (error) {
+        console.error('Error fetching staff members:', error)
+        setStaffMembers([])
+      } finally {
+        setLoadingStaff(false)
+      }
+    }
+
+    fetchStaffMembers()
+  }, [category])
+
   const handleCreateIssue = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (!category) {
+      setError("Please select a category")
+      return
+    }
+
+    if (!priority) {
+      setError("Please select a priority level")
+      return
+    }
+
+    // if (!assignedTo) {
+    //   setError("Please assign the issue to a staff member")
+    //   return
+    // }
+
     setLoading(true)
 
     const result = await createIssue({
@@ -70,6 +118,7 @@ export default function ClientDashboard() {
       description,
       category,
       priority,
+      assignedTo: (assignedTo && assignedTo !== 'auto') ? assignedTo : undefined,
     })
 
     if (result.success) {
@@ -77,6 +126,8 @@ export default function ClientDashboard() {
       setDescription("")
       setCategory("")
       setPriority("")
+      setAssignedTo("")
+      setStaffMembers([])
       setIsCreateDialogOpen(false)
     } else {
       setError(result.error || "Failed to create issue")
@@ -271,6 +322,13 @@ export default function ClientDashboard() {
                 <SelectItem value="Infrastructure">Infrastructure</SelectItem>
                 <SelectItem value="IT/Technical">IT/Technical</SelectItem>
                 <SelectItem value="Portal">Portal</SelectItem>
+                <SelectItem value="HR">HR</SelectItem>
+                <SelectItem value="Facilities">Facilities</SelectItem>
+                <SelectItem value="Finance">Finance</SelectItem>
+                <SelectItem value="Security">Security</SelectItem>
+                <SelectItem value="Operations">Operations</SelectItem>
+                <SelectItem value="Support">Support</SelectItem>
+                <SelectItem value="Policy">Policy</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -312,7 +370,7 @@ export default function ClientDashboard() {
 
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select value={category} onValueChange={setCategory} required disabled={loading}>
+                  <Select value={category} onValueChange={setCategory} disabled={loading}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select issue category" />
                     </SelectTrigger>
@@ -320,13 +378,20 @@ export default function ClientDashboard() {
                       <SelectItem value="Infrastructure">Infrastructure Issues</SelectItem>
                       <SelectItem value="IT/Technical">IT/Technical Support</SelectItem>
                       <SelectItem value="Portal">Portal/Website Issues</SelectItem>
+                      <SelectItem value="HR">Human Resources</SelectItem>
+                      <SelectItem value="Facilities">Facilities / Administration</SelectItem>
+                      <SelectItem value="Finance">Finance / Accounts</SelectItem>
+                      <SelectItem value="Security">Security / Compliance</SelectItem>
+                      <SelectItem value="Operations">Operations</SelectItem>
+                      <SelectItem value="Support">Internal Helpdesk</SelectItem>
+                      <SelectItem value="Policy">Policy / Management</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="priority">Priority Level</Label>
-                  <Select value={priority} onValueChange={setPriority} required disabled={loading}>
+                  <Select value={priority} onValueChange={setPriority} disabled={loading}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority level" />
                     </SelectTrigger>
@@ -335,6 +400,28 @@ export default function ClientDashboard() {
                       <SelectItem value="Medium">Medium - Affecting productivity</SelectItem>
                       <SelectItem value="High">High - Significant impact</SelectItem>
                       <SelectItem value="Critical">Critical - System down</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="assignedTo">Assign to Staff Member (Optional - Auto-assigned if empty)</Label>
+                  <Select value={assignedTo} onValueChange={setAssignedTo} disabled={loading || loadingStaff || !category}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        loadingStaff ? "Loading staff members..." :
+                          !category ? "Select a category first" :
+                            staffMembers.length === 0 ? "No staff available" :
+                              "Auto-assign (Best Match)"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">Auto-assign (Best Match)</SelectItem>
+                      {staffMembers.map((staff) => (
+                        <SelectItem key={staff._id} value={staff._id}>
+                          {staff.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -353,16 +440,16 @@ export default function ClientDashboard() {
                 </div>
 
                 <div className="flex justify-end space-x-3">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsCreateDialogOpen(false)}
                     disabled={loading}
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="bg-slate-900 hover:bg-slate-800"
                     disabled={loading}
                   >

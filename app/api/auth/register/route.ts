@@ -6,8 +6,8 @@ import { hashPassword, generateToken } from '@/lib/auth'
 export async function POST(request: NextRequest) {
   try {
     await dbConnect()
-    
-    const { email, password, role, name, department } = await request.json()
+
+    const { email, password, role, name, department, categories } = await request.json()
 
     // Check if user already exists
     const existingUser = await User.findOne({ email })
@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
       role,
       name,
       department: department || '',
+      categories: categories || [],
     })
 
     // Generate token
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
         role: user.role,
         name: user.name,
         department: user.department,
+        categories: user.categories,
       },
     })
 

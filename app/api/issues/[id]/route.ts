@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import Issue from '@/models/Issue'
 import { verifyToken } from '@/lib/auth'
+import { sendStatusUpdateEmail } from '@/lib/email'
 
 // Update issue
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
@@ -41,7 +42,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           obj[key] = updates[key]
           return obj
         }, {})
-      
+
       const updatedIssue = await Issue.findByIdAndUpdate(
         id,
         filteredUpdates,
@@ -57,6 +58,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       updates,
       { new: true, runValidators: true }
     ).populate('createdBy', 'name email').populate('assignedTo', 'name email')
+
+    // Send email if status changed
+    if (updates.status && updatedIssue.createdBy && updatedIssue.createdBy.email) {
+      sendStatusUpdateEmail(
+        updatedIssue.createdBy.email,
+        updatedIssue.createdBy.name,
+        updatedIssue.title,
+        updates.status
+      ).catch(err => console.error('Failed to send status update email:', err))
+    }
 
     return NextResponse.json({ issue: updatedIssue })
   } catch (error) {

@@ -12,7 +12,7 @@ const IssueSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category is required'],
-    enum: ['Infrastructure', 'IT/Technical', 'Portal'],
+    enum: ['Infrastructure', 'IT/Technical', 'Portal', 'HR', 'Facilities', 'Finance', 'Security', 'Operations', 'Support', 'Policy'],
   },
   priority: {
     type: String,

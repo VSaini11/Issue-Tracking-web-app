@@ -45,7 +45,7 @@ export const useIssues = () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const params = new URLSearchParams()
       if (filters?.status && filters.status !== 'all') {
         params.append('status', filters.status)
@@ -59,7 +59,7 @@ export const useIssues = () => {
 
       const url = `/api/issues${params.toString() ? `?${params.toString()}` : ''}`
       const response = await fetch(url)
-      
+
       if (response.ok) {
         const data = await response.json()
         setIssues(data.issues)
@@ -82,6 +82,7 @@ export const useIssues = () => {
     priority: string
     dueDate?: string
     tags?: string[]
+    assignedTo?: string
   }) => {
     try {
       const response = await fetch('/api/issues', {
@@ -118,7 +119,7 @@ export const useIssues = () => {
 
       if (response.ok) {
         const data = await response.json()
-        setIssues(prev => prev.map(issue => 
+        setIssues(prev => prev.map(issue =>
           issue._id === id ? data.issue : issue
         ))
         return { success: true, issue: data.issue }
