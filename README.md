@@ -1,6 +1,6 @@
 # IssueTracker Pro 🎯
 
-**Enterprise Issue Management System** - A comprehensive internal issue tracking portal designed for organizations requiring robust tracking, role-based access control, and real-time monitoring capabilities.
+**Intelligent Issue Tracking & Assignment System** - An automated issue resolution platform that intelligently assigns issues to the most efficient available technical staff using priority-weighted performance metrics and real-time Gmail notifications.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
@@ -33,34 +33,58 @@
 
 ## 🎯 Overview
 
-**IssueTracker Pro** is a professional internal issue management portal that streamlines organizational technical operations. The platform enables employees to report issues, technical teams to manage and resolve them, and administrators to monitor system performance with comprehensive analytics.
+**IssueTracker Pro** is an intelligent Issue Tracking System that automates the entire issue resolution workflow. Employees raise issues, and the system intelligently assigns them to the most efficient available technical staff using priority-weighted performance metrics.
+
+The platform continuously evaluates technical staff efficiency based on real issue-handling behavior and ensures that critical issues are resolved by the most capable resolvers. Real-time Gmail notifications keep all stakeholders informed at every stage, making the system fast, reliable, and fully automated.
 
 ### Key Highlights
 
-- **Multi-Role Authentication**: Secure role-based access for Clients, Team Members, and Administrators
-- **Centralized Issue Management**: Track infrastructure, IT/technical, HR, facilities, and operational issues
-- **Real-time Analytics**: Live dashboards with performance metrics and audit trails
-- **Enterprise Security**: JWT-based authentication with bcrypt password hashing
-- **Responsive Design**: Professional UI built with Radix UI components and Tailwind CSS
+- **🤖 Intelligent Assignment Engine**: Automatically assigns issues to the most efficient technical staff based on priority-weighted performance metrics and real-time staff evaluation
+- **📊 Performance Metrics Analysis**: Continuously evaluates staff efficiency based on actual issue-handling behavior (resolution time, issue quality, workload capacity)
+- **⚡ Dynamic Learning**: The system adapts and improves assignment decisions based on historical performance data and ongoing issue resolution patterns
+- **🔔 Real-Time Gmail Notifications**: Automated email alerts at every stage (Issue Creation, Assignment, Status Updates, Issue Resolution)
+- **🎯 Priority-Weighted Assignments**: Critical issues are automatically routed to the most capable resolvers with proven track records
+- **🔐 Multi-Role Access Control**: Secure role-based authentication for Clients, Technical Staff, and Administrators
+- **📈 Live Performance Dashboards**: Real-time analytics showing staff efficiency, resolution rates, and system-wide metrics
+
 
 ---
 
 ## ✨ Features
 
-### 🔐 Authentication & Authorization
+### 🤖 Intelligent Assignment Engine
+- **Automated Issue Assignment**: Issues are automatically assigned to the most efficient available technical staff
+- **Priority-Weighted Algorithms**: Assignment decisions consider issue priority, staff workload, and historical performance metrics
+- **Real-Time Staff Evaluation**: Continuous assessment of technical staff efficiency based on:
+  - Issue resolution time
+  - Quality of resolutions
+  - Current workload capacity
+  - Category expertise
+  - Success rate on critical issues
+- **Dynamic Learning**: The system improves assignment accuracy over time based on performance data
+- **Workload Balancing**: Ensures optimal distribution of issues across technical staff
+
+### � Real-Time Gmail Notifications
+- **Issue Creation Notifications**: Instant alerts when employees raise new issues
+- **Assignment Notifications**: Technical staff notified immediately upon issue assignment
+- **Status Update Alerts**: All stakeholders informed when issue status changes
+- **Resolution Confirmations**: Automated notifications when issues are resolved
+- **Email Service Integration**: Seamless Gmail integration using Nodemailer with OAuth2
+
+### �🔐 Authentication & Authorization
 - **JWT-based authentication** with secure token management
 - **Role-based access control** (RBAC) with three user levels:
-  - **Client**: Submit and track personal issues
-  - **Team**: Manage assigned issues across categories
-  - **Admin**: Full system access with analytics and user management
+  - **Client (Employee)**: Submit and track personal issues
+  - **Team (Technical Staff)**: Manage assigned issues and view category-specific workload
+  - **Admin**: Full system access with analytics, user management, and performance monitoring
 - **Password encryption** using bcryptjs
-- **Automatic session management** with middleware protection
+- **Middleware-based authentication check** protecting all routes
 
 ### 📊 Issue Management
 - **Multi-category support**: Infrastructure, IT/Technical, Portal, HR, Facilities, Finance, Security, Operations, Support, Policy
 - **Priority levels**: Low, Medium, High, Critical
 - **Status tracking**: Open, In Progress, Resolved, Closed
-- **Issue assignment** to team members
+- **Intelligent automated assignment** to most efficient technical staff
 - **Comment system** for collaboration
 - **Due date tracking**
 - **Tag-based filtering**
@@ -128,32 +152,68 @@
 
 ## 🏗️ System Architecture
 
-```mermaid
-graph TB
-    A[Client Browser] --> B[Next.js Frontend]
-    B --> C[Middleware - Auth Check]
-    C --> D{Authenticated?}
-    D -->|Yes| E[API Routes]
-    D -->|No| F[Login Page]
-    E --> G[MongoDB Database]
-    E --> H[Email Service - Gmail]
-    
-    subgraph "User Roles"
-        I[Client Dashboard]
-        J[Team Dashboard]
-        K[Admin Dashboard]
-    end
-    
-    C --> I
-    C --> J
-    C --> K
-    
-    G --> L[(Users Collection)]
-    G --> M[(Issues Collection)]
-    
-    style B fill:#0070f3,color:#fff
-    style G fill:#00ed64,color:#000
-    style C fill:#ff6b6b,color:#fff
+### Intelligent Issue Tracking & Assignment System
+
+The system follows a comprehensive workflow designed to automate issue resolution:
+
+#### 1️⃣ **Client Browser & Frontend**
+- Employees access the **Next.js Frontend** to raise issues via the client dashboard
+- Team members view assigned issues through the team dashboard
+- Admins monitor system-wide performance through the admin dashboard
+
+#### 2️⃣ **Middleware Authentication Check**
+- All requests pass through **authentication middleware** for security
+- Validates JWT tokens and enforces role-based access control
+- Routes unauthenticated users to login page
+
+#### 3️⃣ **Issue Tracking Platform**
+The core platform consists of three specialized dashboards:
+- **Client Dashboard**: Issue creation and tracking
+- **Team Dashboard**: Assigned issue management and resolution
+- **Admin Dashboard**: System oversight and performance monitoring
+
+#### 4️⃣ **Intelligent Assignment Engine**
+The heart of the system that ensures optimal issue resolution:
+- **Priority-Weighted Assignments**: Considers issue urgency and complexity
+- **Real-Time Staff Evaluation**: Analyzes current workload and availability
+- **Performance Metrics Analysis**: Uses historical data to select the best resolver
+
+The engine performs **dynamic learning**, continuously updating staff performance profiles based on:
+- Resolution time efficiency
+- Issue quality metrics
+- Category expertise
+- Success rates
+
+#### 5️⃣ **Database Layer (MongoDB)**
+Stores all system data in two primary collections:
+- **Users Collection**: Employee profiles, technical staff data, and performance metrics
+- **Issues Collection**: Complete issue lifecycle with status history and audit trails
+
+#### 6️⃣ **Email Service (Gmail Notifications)**
+Real-time notifications powered by Nodemailer with Gmail OAuth2:
+- 📧 **Issue Creation**: Notifies admin and relevant team
+- 📧 **Assigned Issue**: Alerts assigned technical staff member
+- 📧 **Status Updates**: Informs stakeholders of progress
+- 📧 **Issue Resolution**: Confirms completion to all parties
+
+#### 7️⃣ **Priority Recommendation System**
+Visual indicators for prioritization:
+- 🔴 **High Priority**: Critical issues requiring immediate attention
+- 🟡 **Medium Priority**: Standard issues in normal queue
+- 🟢 **Low Priority**: Non-urgent maintenance items
+
+### Architecture Flow
+
+```
+Employee Raises Issue → Middleware Auth Check → Issue Tracking Platform
+                                                           ↓
+                                         Intelligent Assignment Engine
+                                         (analyzes performance metrics)
+                                                           ↓
+                                    Assigns to Most Efficient Staff ←→ MongoDB
+                                                           ↓
+                                         Gmail Notifications Sent
+                                         (to all stakeholders)
 ```
 
 ---
@@ -208,8 +268,9 @@ Before you begin, ensure you have the following installed:
 Create a `.env.local` file with the following variables:
 
 ```env
-# MongoDB Connection
-MONGODB_URI=""
+# MongoDB Connection (Get your connection string from MongoDB Atlas)
+# IMPORTANT: Never share or commit your MongoDB URI
+MONGDB_URI="your-mongodb-connection-string"
 
 # JWT Secret (use a strong random string in production)
 JWT_SECRET="your-secret-key-here-change-in-production"
@@ -218,14 +279,14 @@ JWT_SECRET="your-secret-key-here-change-in-production"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-nextauth-secret-here"
 
-# Gmail OAuth2 Configuration (Optional - for email notifications)
+# Gmail OAuth2 Configuration (Required for real-time notifications)
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 GOOGLE_REFRESH_TOKEN="your-google-refresh-token"
 EMAIL_USER="your-email@gmail.com"
 ```
 
-> ⚠️ **Security Warning**: Never commit `.env.local` to version control. Keep your secrets secure!
+> ⚠️ **Security Warning**: Never commit `.env.local` to version control or share your MongoDB URI publicly. Keep all credentials secure!
 
 #### Getting Gmail OAuth2 Credentials (Optional)
 
@@ -329,19 +390,30 @@ issue-tracking-portal/
 ---
 
 ### Team Member (Technical Staff)
-**Use Case**: Technical staff who resolve issues in specific categories
+**Use Case**: Technical staff who resolve issues with intelligent automated assignment
+
+**How Assignment Works**:
+- Issues are **automatically assigned** by the Intelligent Assignment Engine
+- Assignment is based on **priority-weighted performance metrics**:
+  - Historical resolution time efficiency
+  - Current workload capacity
+  - Category expertise and specialization
+  - Success rate on critical issues
+  - Real-time availability status
+- **Gmail notifications** sent immediately upon assignment
 
 **Permissions**:
-- ✅ View assigned issues
-- ✅ View all issues in their categories
+- ✅ View automatically assigned issues
+- ✅ View all issues in their specialized categories
 - ✅ Update issue status and priority
-- ✅ Assign issues to themselves
-- ✅ Add comments to any issue in their categories
-- ✅ Set due dates
+- ✅ Add comments and collaborate with team members
+- ✅ Set due dates and track progress
+- ✅ View personal performance metrics
+- ❌ Cannot manually assign issues (automated by system)
 - ❌ Cannot manage users
-- ❌ Cannot access full analytics
+- ❌ Cannot access full system analytics
 
-**Category Assignment**: During registration, team members select which categories they handle:
+**Category Specialization**: During registration, team members select expertise areas:
 - Infrastructure
 - IT/Technical
 - Portal
@@ -354,11 +426,16 @@ issue-tracking-portal/
 - Policy
 
 **Dashboard Features**:
+- Automatically assigned issue queue
 - Category-filtered issue list
-- Assignment management
-- Status update interface
-- Collaboration tools
-- Personal performance metrics
+- Real-time status update interface
+- Performance metrics dashboard showing:
+  - Personal efficiency score
+  - Average resolution time
+  - Issue quality ratings
+  - Workload capacity
+- Collaboration and comment tools
+- Gmail notification history
 
 ---
 
