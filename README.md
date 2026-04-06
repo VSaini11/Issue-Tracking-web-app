@@ -16,6 +16,7 @@
 - [User Roles & Permissions](#user-roles--permissions)
 - [Admin Dashboard — Full Feature Breakdown](#admin-dashboard--full-feature-breakdown)
 - [Staff Performance Report](#staff-performance-report)
+- [Executive Meetings](#tab-3--executive-meetings)
 - [Email Notification System](#email-notification-system)
 - [Intelligent Auto-Assignment Engine](#intelligent-auto-assignment-engine)
 - [Tech Stack](#tech-stack)
@@ -46,7 +47,7 @@ The system automates the entire issue lifecycle within each organization — fro
 | 🤖 Auto-Assignment Engine | Domain-aware routing that matches issues to best-fit staff *within* the specific organization |
 | 🎨 Branded Dashboards | Custom company logos and branding elements for a personalized organization experience |
 | 📊 Staff Performance Reports | Tenant-scoped performance metrics with live scoring over 60-day rolling windows |
-| 🏆 Reward Eligibility | Automated tracking for high-performing staff members (score ≥ 90%) |
+| 📅 Executive Meetings | Advanced scheduling system for Zoom/Meet with automated starting-now notifications |
 | 📧 Smart Notifications | Real-time email updates for assignments, status changes, and account management |
 | 🔐 Advanced RBAC | Industry-standard JWT authentication with granular role-based access control |
 
@@ -155,7 +156,7 @@ The Admin has full visibility into the system:
 - Views **all issues** across all users
 - Manages users (activate/deactivate accounts)
 - Reviews **Staff Performance Reports** with live scoring
-- Checks **Reward Eligibility** for each staff member
+- Schedules and manages **Executive Meetings** (Zoom, Google Meet, etc.)
 - Edits issue status, deletes issues
 - Sees users separated into Administrator / Staff / Client sections
 
@@ -204,14 +205,14 @@ These categories are stored in MongoDB and used by the assignment engine to rout
 | Create, update, delete any issue | ✅ |
 | Manage users (activate/deactivate) | ✅ |
 | View staff performance reports | ✅ |
-| View reward eligibility status | ✅ |
+| Schedule & Manage Meetings | ✅ |
 | Access all sections of user management | ✅ |
 
 ---
 
 ## 🛠️ Admin Dashboard — Full Feature Breakdown
 
-The Admin Dashboard is divided into two main tabs:
+The Admin Dashboard is divided into three main operational areas:
 
 ### Tab 1 — Issues Management
 
@@ -239,6 +240,16 @@ Shows all users with role `client`. Hover also shows their short ID and departme
 
 ---
 
+### Tab 3 — Executive Meetings
+
+Admins can schedule and manage virtual meetings within their organization:
+- **Schedule New Meeting**: Set Title/Agenda, Date, Time, and Platform (Zoom/Google Meet/Other)
+- **Automated Notifications**: System automatically triggers "Meeting Starting Now" emails to organizers
+- **Meeting Stream**: A real-time list of upcoming meetings with one-click join links
+- **Platform Support**: Built-in visual indicators for Zoom and Google Meet links
+
+---
+
 ### Activate / Deactivate User
 
 Admins can deactivate any user (except themselves). When a user is deactivated:
@@ -263,7 +274,6 @@ Clicking on any staff member's name in the Staff Users section opens a full **Pe
 | Staff Info | Name, Email, Short ID, Department/Categories |
 | Performance Score | % score with color-coded progress bar |
 | Issue Breakdown | Counts of Open, In Progress, Resolved, Closed issues |
-| Reward Eligibility | Badge showing if the staff qualifies for rewards |
 
 ### Performance Score Calculation
 
@@ -281,13 +291,6 @@ Calculated over the **last 60 days** only.
 | 70–89% | 🟡 Yellow | Good |
 | < 70% | 🔴 Red | Needs Improvement |
 
-### Reward Eligibility
-
-- **Eligible**: Score ≥ 90% → Gold trophy badge: *"✓ Eligible for Rewards"*
-- **Not Eligible**: Score < 90% → Shows exact gap: *"Needs X% more to qualify"*
-
-This eligibility flag is the foundation for future reward distribution features.
-
 ---
 
 ## 📧 Email Notification System
@@ -302,6 +305,7 @@ All emails are sent via **Nodemailer** using Gmail OAuth2. The system falls back
 | Issue assigned (reporter confirmation) | Client | `[Update] Your issue has been assigned` |
 | Issue status changed | Client | `[Update] <Title> is now <Status>` |
 | Account deactivated by admin | Deactivated user | `[Warning] Your Account Has Been Deactivated` |
+| Meeting starting now | Admin (Organizer) | `[Ready] Meeting Started: <Title>` |
 
 ### Deactivation Email Content
 
