@@ -39,6 +39,11 @@ export async function GET(request: NextRequest) {
         role: user.role,
         name: user.name,
         department: user.department,
+        avatar: user.avatar,
+        tenantId: user.tenantId,
+        companyName: user.companyName,
+        companyWebsite: user.companyWebsite,
+        companyLogo: user.companyLogo,
       },
     })
   } catch (error) {

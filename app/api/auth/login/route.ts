@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate token
-    const token = generateToken(user._id.toString(), user.email, user.role)
+    // Generate token with tenantId
+    const token = generateToken(user._id.toString(), user.email, user.role, user.tenantId)
 
     // Set cookie
     const response = NextResponse.json({
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
         role: user.role,
         name: user.name,
         department: user.department,
+        tenantId: user.tenantId,
       },
     })
 

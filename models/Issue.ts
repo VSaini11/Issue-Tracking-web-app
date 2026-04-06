@@ -12,7 +12,18 @@ const IssueSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category is required'],
-    enum: ['Infrastructure', 'IT/Technical', 'Portal', 'HR', 'Facilities', 'Finance', 'Security', 'Operations', 'Support', 'Policy'],
+    enum: [
+      'Infrastructure', 
+      'IT/Technical', 
+      'Portal', 
+      'Human Resources', 
+      'Administration', 
+      'Accounts / Finance', 
+      'Security / Compliance', 
+      'Operations', 
+      'Internal Helpdesk', 
+      'Management'
+    ],
   },
   priority: {
     type: String,
@@ -51,8 +62,28 @@ const IssueSchema = new mongoose.Schema({
     default: null,
   },
   tags: [String],
+  clientRating: {
+    type: Number,
+    min: 1,
+    max: 5,
+    default: null,
+  },
+  ratingRequested: {
+    type: Boolean,
+    default: false,
+  },
+  tenantId: {
+    type: String,
+    required: true,
+    index: true,
+  },
 }, {
   timestamps: true,
 })
+
+// Clear the model from mongoose if it doesn't have the new fields (development only)
+if (mongoose.models.Issue && !mongoose.models.Issue.schema.paths.category.options.enum.includes('Internal Helpdesk')) {
+  delete (mongoose as any).models.Issue
+}
 
 export default mongoose.models.Issue || mongoose.model('Issue', IssueSchema)

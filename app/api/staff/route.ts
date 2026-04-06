@@ -26,24 +26,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Category is required' }, { status: 400 })
     }
 
-    // DEBUG: Find ALL active team members first to see what's in the DB
-    const allTeamMembers = await User.find({ role: 'team', isActive: true })
-    console.log(`[Re-Debug] Total Active Team Members in DB: ${allTeamMembers.length}`)
-    allTeamMembers.forEach(m => {
-      console.log(`[Re-Debug] User: ${m.name}, Role: ${m.role}, Categories: ${JSON.stringify(m.categories)}`)
-    })
-
-    // Find active team members who handle this category
+    // Find active team members in the SAME tenant who handle this category
     const staffMembers = await User.find({
       role: 'team',
-      categories: { $in: [category.trim()] },
+      tenantId: decoded.tenantId, // Security: Must be in the same organization
       isActive: true,
+      $or: [
+        { department: category.trim() },
+        { categories: { $in: [category.trim()] } }
+      ]
     })
       .select('name email')
       .sort({ name: 1 })
-
-    console.log(`[Re-Debug] Searching staff for category: "${category}"`)
-    console.log(`[Re-Debug] Found ${staffMembers.length} staff members:`, staffMembers.map(s => s.name))
 
     return NextResponse.json({ staffMembers })
   } catch (error) {

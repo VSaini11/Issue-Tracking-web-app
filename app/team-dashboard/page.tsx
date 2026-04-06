@@ -181,12 +181,26 @@ export default function TeamDashboard() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden">
+                {user.companyLogo ? (
+                  <img src={user.companyLogo} alt="Logo" className="w-full h-full object-contain p-1" />
+                ) : (
+                  <Building2 className="h-6 w-6 text-white" />
+                )}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Team Dashboard</h1>
-                <p className="text-sm text-slate-600">Issue Management & Resolution</p>
+                <h1 className="text-xl font-bold text-slate-900">{user.companyName || 'Team Dashboard'}</h1>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-slate-600">{user.companyName ? 'Team Dashboard' : 'Issue Management & Resolution'}</p>
+                  {user.companyWebsite && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <a href={user.companyWebsite} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline font-medium">
+                        {user.companyWebsite.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                      </a>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">

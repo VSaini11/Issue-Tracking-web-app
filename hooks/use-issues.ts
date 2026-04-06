@@ -28,6 +28,8 @@ interface Issue {
   }>
   dueDate?: string
   tags: string[]
+  clientRating?: number | null
+  ratingRequested?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -57,8 +59,8 @@ export const useIssues = () => {
         params.append('assignedTo', filters.assignedTo)
       }
 
-      const url = `/api/issues${params.toString() ? `?${params.toString()}` : ''}`
-      const response = await fetch(url)
+      const url = `/api/issues?t=${Date.now()}${params.toString() ? `&${params.toString()}` : ''}`
+      const response = await fetch(url, { cache: 'no-store' })
 
       if (response.ok) {
         const data = await response.json()

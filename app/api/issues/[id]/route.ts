@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth'
 import { sendStatusUpdateEmail } from '@/lib/email'
 
 // Update issue
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.cookies.get('token')?.value
     if (!token) {
@@ -19,11 +19,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     await dbConnect()
 
-    const { id } = params
+    const { id } = await params
     const updates = await request.json()
 
-    // Check if user has permission to update
-    const issue = await Issue.findById(id)
+    // Check if user has permission to update within their tenant
+    const issue = await Issue.findOne({ _id: id, tenantId: decoded.tenantId })
     if (!issue) {
       return NextResponse.json({ error: 'Issue not found' }, { status: 404 })
     }
@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // Delete issue
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.cookies.get('token')?.value
     if (!token) {
@@ -99,8 +99,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     await dbConnect()
 
-    const { id } = params
-    const deletedIssue = await Issue.findByIdAndDelete(id)
+    const { id } = await params
+    const deletedIssue = await Issue.findOneAndDelete({ _id: id, tenantId: decoded.tenantId })
 
     if (!deletedIssue) {
       return NextResponse.json({ error: 'Issue not found' }, { status: 404 })

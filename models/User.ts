@@ -32,8 +32,34 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  avatar: {
+    type: String,
+    default: '',
+  },
+  tenantId: {
+    type: String,
+    required: true,
+    index: true,
+  },
+  companyName: {
+    type: String,
+    default: '',
+  },
+  companyWebsite: {
+    type: String,
+    default: '',
+  },
+  companyLogo: {
+    type: String,
+    default: '',
+  },
 }, {
   timestamps: true,
 })
+
+// Clear the model from mongoose if it doesn't have the new fields (development only)
+if (mongoose.models.User && !mongoose.models.User.schema.paths.companyName) {
+  delete (mongoose as any).models.User
+}
 
 export default mongoose.models.User || mongoose.model('User', UserSchema)

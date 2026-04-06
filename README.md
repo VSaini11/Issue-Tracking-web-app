@@ -1,6 +1,6 @@
 # IssueTracker Pro 🎯
 
-**Intelligent Issue Tracking & Assignment System** - An automated issue resolution platform that intelligently assigns issues to the most efficient available technical staff using priority-weighted performance metrics and real-time Gmail notifications.
+**Intelligent Issue Tracking & Assignment System** — A full-stack issue resolution platform with automated staff assignment, real-time email notifications, performance analytics, and a comprehensive admin control panel.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
@@ -12,209 +12,335 @@
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [System Architecture](#system-architecture)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-  - [Database Setup](#database-setup)
-- [Project Structure](#project-structure)
+- [Complete System Workflow](#complete-system-workflow)
 - [User Roles & Permissions](#user-roles--permissions)
+- [Admin Dashboard — Full Feature Breakdown](#admin-dashboard--full-feature-breakdown)
+- [Staff Performance Report](#staff-performance-report)
+- [Email Notification System](#email-notification-system)
+- [Intelligent Auto-Assignment Engine](#intelligent-auto-assignment-engine)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
 - [API Documentation](#api-documentation)
-- [Scripts & Utilities](#scripts--utilities)
-- [Deployment](#deployment)
 - [Security](#security)
-- [Contributing](#contributing)
+- [Deployment](#deployment)
 - [License](#license)
 
 ---
 
 ## 🎯 Overview
 
-**IssueTracker Pro** is an intelligent Issue Tracking System that automates the entire issue resolution workflow. Employees raise issues, and the system intelligently assigns them to the most efficient available technical staff using priority-weighted performance metrics.
+**IssueTracker Pro** is a multi-role issue tracking and resolution platform built for teams and organizations. It automates the entire issue lifecycle — from submission to resolution — using intelligent staff assignment algorithms, priority-weighted performance metrics, and real-time Gmail email notifications.
 
-The platform continuously evaluates technical staff efficiency based on real issue-handling behavior and ensures that critical issues are resolved by the most capable resolvers. Real-time Gmail notifications keep all stakeholders informed at every stage, making the system fast, reliable, and fully automated.
+The system features three separate role-based dashboards (Client, Staff, Admin), a fully automated issue routing engine, live performance scoring, reward eligibility tracking, and a rich admin control panel with user management capabilities.
 
 ### Key Highlights
 
-- **🤖 Intelligent Assignment Engine**: Automatically assigns issues to the most efficient technical staff based on priority-weighted performance metrics and real-time staff evaluation
-- **📊 Performance Metrics Analysis**: Continuously evaluates staff efficiency based on actual issue-handling behavior (resolution time, issue quality, workload capacity)
-- **⚡ Dynamic Learning**: The system adapts and improves assignment decisions based on historical performance data and ongoing issue resolution patterns
-- **🔔 Real-Time Gmail Notifications**: Automated email alerts at every stage (Issue Creation, Assignment, Status Updates, Issue Resolution)
-- **🎯 Priority-Weighted Assignments**: Critical issues are automatically routed to the most capable resolvers with proven track records
-- **🔐 Multi-Role Access Control**: Secure role-based authentication for Clients, Technical Staff, and Administrators
-- **📈 Live Performance Dashboards**: Real-time analytics showing staff efficiency, resolution rates, and system-wide metrics
-
+| Feature | Description |
+|---------|-------------|
+| 🤖 Auto-Assignment Engine | Issues are routed to the best-fit staff based on category expertise and priority-weighted efficiency scores |
+| 📊 Staff Performance Reports | Admins can view any staff member's issue metrics and performance score over the last 60 days |
+| 🏆 Reward Eligibility | Staff with ≥ 90% performance score are automatically flagged as eligible for rewards |
+| 📧 Email Notifications | Automated emails for issue assignment, status changes, and account deactivation |
+| 👥 Separated User Management | Admin sees Administrators, Staff, and Clients in three distinct sections |
+| 🔐 Role-Based Access Control | JWT-based auth with full RBAC for Client, Staff, and Admin roles |
+| 🎨 Hover Info Cards | Hovering over staff names shows their unique ID, department, and handled categories |
 
 ---
 
-## ✨ Features
+## 🔄 Complete System Workflow
 
-### 🤖 Intelligent Assignment Engine
-- **Automated Issue Assignment**: Issues are automatically assigned to the most efficient available technical staff
-- **Priority-Weighted Algorithms**: Assignment decisions consider issue priority, staff workload, and historical performance metrics
-- **Real-Time Staff Evaluation**: Continuous assessment of technical staff efficiency based on:
-  - Issue resolution time
-  - Quality of resolutions
-  - Current workload capacity
-  - Category expertise
-  - Success rate on critical issues
-- **Dynamic Learning**: The system improves assignment accuracy over time based on performance data
-- **Workload Balancing**: Ensures optimal distribution of issues across technical staff
+This section explains the full lifecycle of the system from registration to issue resolution.
 
-### � Real-Time Gmail Notifications
-- **Issue Creation Notifications**: Instant alerts when employees raise new issues
-- **Assignment Notifications**: Technical staff notified immediately upon issue assignment
-- **Status Update Alerts**: All stakeholders informed when issue status changes
-- **Resolution Confirmations**: Automated notifications when issues are resolved
-- **Email Service Integration**: Seamless Gmail integration using Nodemailer with OAuth2
+### Step 1 — User Registration
 
-### �🔐 Authentication & Authorization
-- **JWT-based authentication** with secure token management
-- **Role-based access control** (RBAC) with three user levels:
-  - **Client (Employee)**: Submit and track personal issues
-  - **Team (Technical Staff)**: Manage assigned issues and view category-specific workload
-  - **Admin**: Full system access with analytics, user management, and performance monitoring
-- **Password encryption** using bcryptjs
-- **Middleware-based authentication check** protecting all routes
+Users register with one of three roles:
 
-### 📊 Issue Management
-- **Multi-category support**: Infrastructure, IT/Technical, Portal, HR, Facilities, Finance, Security, Operations, Support, Policy
-- **Priority levels**: Low, Medium, High, Critical
-- **Status tracking**: Open, In Progress, Resolved, Closed
-- **Intelligent automated assignment** to most efficient technical staff
-- **Comment system** for collaboration
-- **Due date tracking**
-- **Tag-based filtering**
+- **Client** — Employees who submit issues
+- **Team (Staff)** — Technical staff who resolve issues. They **select their category expertise** (e.g., IT/Technical, HR, Finance) during registration. This data is stored with their profile and used for smart auto-assignment.
+- **Admin** — System administrators with full control
 
-### 📈 Dashboard Features
+Each user is assigned a **unique MongoDB `_id`** at registration, serving as their permanent system identifier. The short version (last 6 characters, uppercase) is displayed in the admin dashboard hover cards.
 
-#### Client Dashboard
-- Submit new issues with detailed descriptions
-- Track personal issue status
-- View issue history and comments
-- Update profile information
+---
 
-#### Team Dashboard
-- View assigned issues by category
-- Update issue status and priority
-- Add comments and collaborate
-- Category-based filtering
-- Performance metrics for assigned work
+### Step 2 — Login & Authentication
 
-#### Admin Dashboard
-- Comprehensive analytics and reporting
-- User management (activate/deactivate accounts)
-- System-wide issue overview
-- Advanced filtering and search
-- Audit trails and compliance reporting
+All users log in via `/api/auth/login`. A **JWT token** is issued and stored in a secure cookie. The middleware validates this token on every request and enforces role-based routing:
 
-### 🎨 UI/UX Features
-- **Modern, professional interface** with shadcn/ui components
-- **Dark mode support** via next-themes
-- **Responsive design** optimized for desktop and mobile
-- **Real-time updates** with dynamic data fetching
-- **Interactive charts** using Recharts
-- **Toast notifications** for user feedback
-- **Form validation** with React Hook Form and Zod
+```
+User logs in → JWT issued → Stored in cookie → Middleware validates on every request
+       ↓                                                        ↓
+  Role = client → /client-dashboard               Unauthorized → Redirect to /
+  Role = team   → /team-dashboard
+  Role = admin  → /admin-dashboard
+```
+
+---
+
+### Step 3 — Client Raises an Issue
+
+A client fills out the issue form on their dashboard with:
+- **Title** and **Description**
+- **Category** (Infrastructure, IT/Technical, HR, Finance, etc.)
+- **Priority** (Low, Medium, High, Critical)
+- Optional: Due Date, Tags
+
+On submission, the system:
+1. Saves the issue to MongoDB with `status: "Open"`
+2. Triggers the **Intelligent Auto-Assignment Engine**
+3. Sends a **Gmail email** to the assigned staff member
+4. Sends a **Gmail email** to the client confirming their issue was assigned
+
+---
+
+### Step 4 — Intelligent Auto-Assignment Engine
+
+When an issue is created, the engine automatically selects the best staff member:
+
+```
+New Issue Created
+      ↓
+Filter staff by issue category (matching expertise)
+      ↓
+Calculate priority-weighted efficiency score for each match
+      ↓
+Check availability (< 3 active issues = available)
+      ↓
+Assign to highest-efficiency available staff
+      ↓
+If all busy → assign to staff with fewest active issues (fallback)
+```
+
+#### Efficiency Score Formula
+
+```
+Efficiency (%) = (Sum of priority-weighted resolved issues / Sum of priority-weighted total assigned) × 100
+```
+
+**Priority Weights Used:**
+| Priority | Weight |
+|----------|--------|
+| Critical | 4 |
+| High | 3 |
+| Medium | 2 |
+| Low | 1 |
+
+> New staff members with zero assignment history start at **100% efficiency** so they get equal opportunities.
+
+---
+
+### Step 5 — Staff Resolves the Issue
+
+The assigned staff member logs into their **Team Dashboard** and:
+- Views all issues assigned to them
+- Can filter by category, status, priority
+- Updates issue status: `Open → In Progress → Resolved → Closed`
+- Adds comments for collaboration or audit trail
+- When status is changed to **Resolved** or **Closed**, the **client receives an email notification**
+
+---
+
+### Step 6 — Admin Monitoring & Oversight
+
+The Admin has full visibility into the system:
+- Views **all issues** across all users
+- Manages users (activate/deactivate accounts)
+- Reviews **Staff Performance Reports** with live scoring
+- Checks **Reward Eligibility** for each staff member
+- Edits issue status, deletes issues
+- Sees users separated into Administrator / Staff / Client sections
+
+---
+
+## 👥 User Roles & Permissions
+
+### 🟢 Client (Employee)
+
+| Permission | Access |
+|-----------|--------|
+| Submit new issues | ✅ |
+| View own issues | ✅ |
+| Add comments to own issues | ✅ |
+| View other users' issues | ❌ |
+| Assign issues to staff | ❌ |
+| Access Admin/Staff features | ❌ |
+
+**Dashboard includes**: Issue submission form, personal issue list with status tracking, comment history.
+
+---
+
+### 🔵 Team (Technical Staff)
+
+| Permission | Access |
+|-----------|--------|
+| View assigned issues | ✅ |
+| Update issue status | ✅ |
+| Add comments | ✅ |
+| View category-specific issues | ✅ |
+| Manually assign issues | ❌ |
+| Manage users | ❌ |
+
+**Category Specialization** — During registration, staff select their expertise:
+- Infrastructure, IT/Technical, Portal, HR, Facilities, Finance, Security, Operations, Support, Policy
+
+These categories are stored in MongoDB and used by the assignment engine to route relevant issues.
+
+---
+
+### 🔴 Admin (Administrator)
+
+| Permission | Access |
+|-----------|--------|
+| Full access to all issues | ✅ |
+| Create, update, delete any issue | ✅ |
+| Manage users (activate/deactivate) | ✅ |
+| View staff performance reports | ✅ |
+| View reward eligibility status | ✅ |
+| Access all sections of user management | ✅ |
+
+---
+
+## 🛠️ Admin Dashboard — Full Feature Breakdown
+
+The Admin Dashboard is divided into two main tabs:
+
+### Tab 1 — Issues Management
+
+- **All Issues Table**: Shows every issue in the system with Title, Status, Category, Assigned Staff, Created By, Date, and Actions
+- **Filters**: Filter by Status (Open, In Progress, Resolved, Closed) and Category
+- **Edit Issue**: Opens a dialog to update the issue status
+- **Delete Issue**: Shows a confirmation dialog before permanently deleting an issue
+
+---
+
+### Tab 2 — User Management (3 Separate Sections)
+
+Users are **not shown in one combined list**. They are organized into three distinct sections:
+
+#### Section 1 — Administrator Users
+Shows all users with role `admin`. Each row has Name, Email, Role badge, Department, Active/Inactive status, Join date, and an Activate/Deactivate button.
+
+#### Section 2 — Staff Users
+Shows all users with role `team`. Each name is interactive:
+- **Hover** → Shows a tooltip with the staff member's short ID, their email, and the department(s)/categories they handle. A hint reads: *"Click name to view performance report"*
+- **Click** → Opens the **Staff Performance Report Dialog** (see below)
+
+#### Section 3 — Client Users
+Shows all users with role `client`. Hover also shows their short ID and department info.
+
+---
+
+### Activate / Deactivate User
+
+Admins can deactivate any user (except themselves). When a user is deactivated:
+1. Their `isActive` flag is set to `false` in MongoDB
+2. They are **unassigned from all active issues**
+3. A **warning email** is automatically sent to the user with the following message:
+
+> *"Your account has been deactivated by the admin. Please meet the department head admin to discuss regarding it."*
+
+When reactivated, the user can log back in and access the system normally.
+
+---
+
+## 📊 Staff Performance Report
+
+Clicking on any staff member's name in the Staff Users section opens a full **Performance Report Dialog**. This report is calculated **live from issue data** for the last 60 days.
+
+### What's Shown
+
+| Section | Description |
+|---------|-------------|
+| Staff Info | Name, Email, Short ID, Department/Categories |
+| Performance Score | % score with color-coded progress bar |
+| Issue Breakdown | Counts of Open, In Progress, Resolved, Closed issues |
+| Reward Eligibility | Badge showing if the staff qualifies for rewards |
+
+### Performance Score Calculation
+
+```
+Performance Score (%) = (Resolved + Closed) / Total Assigned × 100
+```
+
+Calculated over the **last 60 days** only.
+
+### Color Coding
+
+| Score Range | Color | Meaning |
+|-------------|-------|---------|
+| ≥ 90% | 🟢 Green | Excellent |
+| 70–89% | 🟡 Yellow | Good |
+| < 70% | 🔴 Red | Needs Improvement |
+
+### Reward Eligibility
+
+- **Eligible**: Score ≥ 90% → Gold trophy badge: *"✓ Eligible for Rewards"*
+- **Not Eligible**: Score < 90% → Shows exact gap: *"Needs X% more to qualify"*
+
+This eligibility flag is the foundation for future reward distribution features.
+
+---
+
+## 📧 Email Notification System
+
+All emails are sent via **Nodemailer** using Gmail OAuth2. The system falls back to Ethereal Email (mock) if no Gmail credentials are configured.
+
+### Emails Sent
+
+| Trigger | Recipient | Subject |
+|---------|-----------|---------|
+| Issue assigned to staff | Staff member | `[Assigned] <Issue Title>` |
+| Issue assigned (reporter confirmation) | Client | `[Update] Your issue has been assigned` |
+| Issue status changed | Client | `[Update] <Title> is now <Status>` |
+| Account deactivated by admin | Deactivated user | `[Warning] Your Account Has Been Deactivated` |
+
+### Deactivation Email Content
+
+The deactivation warning email includes:
+- A bold red header: **"Account Deactivated"**
+- A warning block in red: *"Please meet the department head admin to discuss regarding it."*
+- Branded footer from Issue Tracking Portal System
+
+---
+
+## 🤖 Intelligent Auto-Assignment Engine
+
+Located in `lib/assignment.ts`, this engine runs every time a new issue is created.
+
+### Algorithm Steps
+
+1. **Fetch all active staff** matching the issue's category
+2. **For each staff member**, query their historical issues in that category
+3. **Calculate efficiency score** using the priority-weighted formula
+4. **Filter by availability** (max 3 active issues at a time)
+5. **Sort by score** and assign to the most efficient available staff
+6. **Fallback**: If no one is available, assign to staff with fewest active issues
+
+### Staff Capacity Rule
+- A staff member is considered **available** if they have fewer than **3 active (Open or In Progress) issues**
+- This prevents overloading high-performing staff and ensures fair distribution
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 15.2.4 (App Router)
-- **Language**: TypeScript 5.0
-- **UI Library**: React 19
-- **Styling**: Tailwind CSS 4.1
-- **Component Library**: Radix UI (shadcn/ui)
-- **Icons**: Lucide React
-- **Forms**: React Hook Form + Zod validation
-- **Charts**: Recharts
-- **Notifications**: Sonner (toast)
+- **Next.js 15.2.4** — App Router, Server Components
+- **TypeScript 5.0** — Full type safety
+- **Tailwind CSS 4.1** — Styling
+- **shadcn/ui (Radix UI)** — 49 UI components including HoverCard, Dialog, Table, Tabs
+- **Lucide React** — Icons
+- **React Hook Form + Zod** — Form validation
+- **Sonner** — Toast notifications
 
 ### Backend
-- **API**: Next.js API Routes
-- **Database**: MongoDB 6.18 with Mongoose 8.17
-- **Authentication**: JWT (jsonwebtoken)
-- **Password Hashing**: bcryptjs
-- **Email**: Nodemailer with Gmail OAuth2
-
-### Development Tools
-- **Package Manager**: npm/pnpm
-- **Linting**: ESLint 9
-- **CSS Processing**: PostCSS with Tailwind
-- **Font**: Geist (Next.js optimized font)
-
----
-
-## 🏗️ System Architecture
-
-### Intelligent Issue Tracking & Assignment System
-
-The system follows a comprehensive workflow designed to automate issue resolution:
-
-#### 1️⃣ **Client Browser & Frontend**
-- Employees access the **Next.js Frontend** to raise issues via the client dashboard
-- Team members view assigned issues through the team dashboard
-- Admins monitor system-wide performance through the admin dashboard
-
-#### 2️⃣ **Middleware Authentication Check**
-- All requests pass through **authentication middleware** for security
-- Validates JWT tokens and enforces role-based access control
-- Routes unauthenticated users to login page
-
-#### 3️⃣ **Issue Tracking Platform**
-The core platform consists of three specialized dashboards:
-- **Client Dashboard**: Issue creation and tracking
-- **Team Dashboard**: Assigned issue management and resolution
-- **Admin Dashboard**: System oversight and performance monitoring
-
-#### 4️⃣ **Intelligent Assignment Engine**
-The heart of the system that ensures optimal issue resolution:
-- **Priority-Weighted Assignments**: Considers issue urgency and complexity
-- **Real-Time Staff Evaluation**: Analyzes current workload and availability
-- **Performance Metrics Analysis**: Uses historical data to select the best resolver
-
-The engine performs **dynamic learning**, continuously updating staff performance profiles based on:
-- Resolution time efficiency
-- Issue quality metrics
-- Category expertise
-- Success rates
-
-#### 5️⃣ **Database Layer (MongoDB)**
-Stores all system data in two primary collections:
-- **Users Collection**: Employee profiles, technical staff data, and performance metrics
-- **Issues Collection**: Complete issue lifecycle with status history and audit trails
-
-#### 6️⃣ **Email Service (Gmail Notifications)**
-Real-time notifications powered by Nodemailer with Gmail OAuth2:
-- 📧 **Issue Creation**: Notifies admin and relevant team
-- 📧 **Assigned Issue**: Alerts assigned technical staff member
-- 📧 **Status Updates**: Informs stakeholders of progress
-- 📧 **Issue Resolution**: Confirms completion to all parties
-
-#### 7️⃣ **Priority Recommendation System**
-Visual indicators for prioritization:
-- 🔴 **High Priority**: Critical issues requiring immediate attention
-- 🟡 **Medium Priority**: Standard issues in normal queue
-- 🟢 **Low Priority**: Non-urgent maintenance items
-
-### Architecture Flow
-
-```
-Employee Raises Issue → Middleware Auth Check → Issue Tracking Platform
-                                                           ↓
-                                         Intelligent Assignment Engine
-                                         (analyzes performance metrics)
-                                                           ↓
-                                    Assigns to Most Efficient Staff ←→ MongoDB
-                                                           ↓
-                                         Gmail Notifications Sent
-                                         (to all stakeholders)
-```
+- **Next.js API Routes** — RESTful endpoints
+- **MongoDB 6.18** with **Mongoose 8.17** — Database and schema modeling
+- **jsonwebtoken** — JWT authentication
+- **bcryptjs** — Password hashing (10 salt rounds)
+- **Nodemailer** — Email service with Gmail OAuth2
 
 ---
 
@@ -222,99 +348,64 @@ Employee Raises Issue → Middleware Auth Check → Issue Tracking Platform
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v18.0 or higher)
-- **npm** or **pnpm** (latest version)
-- **MongoDB Atlas account** or local MongoDB instance
-- **Gmail account** (for email notifications - optional)
-- **Git** for version control
+- Node.js v18+
+- npm or pnpm
+- MongoDB Atlas account (or local MongoDB)
+- Gmail account (optional, for email notifications)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/VSaini11/Issue-Tracking-web-app.git
-   cd issue-tracking-portal
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/VSaini11/Issue-Tracking-web-app.git
+cd issue-tracking-portal
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
+# 2. Install dependencies
+npm install
 
-3. **Set up environment variables**
-   
-   Create a `.env.local` file in the root directory:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Fill in your environment variables (see [Environment Variables](#environment-variables) section)
+# 3. Set up environment variables
+cp .env.example .env.local
+# Fill in your credentials (see Environment Variables section)
 
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
+# 4. Run development server
+npm run dev
+```
 
-5. **Open your browser**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000)
+Visit [http://localhost:3000](http://localhost:3000)
 
-### Environment Variables
+---
 
-Create a `.env.local` file with the following variables:
+## 🔑 Environment Variables
+
+Create `.env.local` in the project root:
 
 ```env
-# MongoDB Connection (Get your connection string from MongoDB Atlas)
-# IMPORTANT: Never share or commit your MongoDB URI
+# MongoDB (Required)
 MONGDB_URI="your-mongodb-connection-string"
 
-# JWT Secret (use a strong random string in production)
-JWT_SECRET="your-secret-key-here-change-in-production"
+# JWT Secret (Required - use a strong 32+ char string)
+JWT_SECRET="your-secret-key-here"
 
-# NextAuth Configuration
+# NextAuth
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-nextauth-secret-here"
+NEXTAUTH_SECRET="your-nextauth-secret"
 
-# Gmail OAuth2 Configuration (Required for real-time notifications)
+# Gmail OAuth2 (Optional - for email notifications)
 GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 GOOGLE_REFRESH_TOKEN="your-google-refresh-token"
 EMAIL_USER="your-email@gmail.com"
 ```
 
-> ⚠️ **Security Warning**: Never commit `.env.local` to version control or share your MongoDB URI publicly. Keep all credentials secure!
+> ⚠️ **Never commit `.env.local` to version control.**
 
-#### Getting Gmail OAuth2 Credentials (Optional)
+### Setting Up Gmail OAuth2
 
-If you want to enable email notifications:
+```bash
+node scripts/get-refresh-token.js
+```
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing one
-3. Enable Gmail API
-4. Create OAuth 2.0 credentials
-5. Run the refresh token script:
-   ```bash
-   node scripts/get-refresh-token.js
-   ```
-
-### Database Setup
-
-1. **MongoDB Atlas** (Recommended for production)
-   - Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-   - Create a new cluster
-   - Get your connection string
-   - Add it to `MONGODB_URI` in `.env.local`
-
-2. **Seed the database** (Optional - for testing)
-   ```bash
-   npm run seed
-   ```
-
-   This will create sample users and issues for testing.
+Follow the interactive prompts to generate your Gmail refresh token.
 
 ---
 
@@ -322,355 +413,153 @@ If you want to enable email notifications:
 
 ```
 issue-tracking-portal/
-├── app/                          # Next.js App Router
-│   ├── admin-dashboard/          # Admin dashboard pages
-│   ├── client-dashboard/         # Client dashboard pages
-│   ├── team-dashboard/           # Team dashboard pages
-│   ├── api/                      # API routes
-│   │   ├── auth/                 # Authentication endpoints
-│   │   │   ├── login/
-│   │   │   └── register/
-│   │   ├── issues/               # Issue CRUD operations
-│   │   ├── users/                # User management
-│   │   └── staff/                # Team member queries
-│   ├── globals.css               # Global styles
-│   ├── layout.tsx                # Root layout
-│   └── page.tsx                  # Landing/Login page
-├── components/                   # React components
-│   ├── ui/                       # shadcn/ui components (49 components)
-│   └── theme-provider.tsx        # Theme context provider
-├── hooks/                        # Custom React hooks
-│   ├── use-auth.ts               # Authentication hook
-│   └── ...
-├── lib/                          # Utility libraries
-│   ├── mongodb.ts                # MongoDB connection
-│   ├── auth.ts                   # Auth utilities
-│   └── utils.ts                  # Helper functions
-├── models/                       # Mongoose schemas
-│   ├── User.ts                   # User model
-│   └── Issue.ts                  # Issue model
-├── scripts/                      # Utility scripts
-│   ├── seed.js                   # Database seeding
-│   ├── cleanup-test-data.js      # Clean test data
-│   ├── fix-legacy-users.js       # Migration scripts
-│   ├── verify-users.js           # User verification
-│   └── get-refresh-token.js      # Gmail OAuth setup
-├── styles/                       # Additional styles
-├── types/                        # TypeScript type definitions
-├── middleware.ts                 # Auth middleware
-├── .env.local                    # Environment variables (not in repo)
-├── next.config.mjs               # Next.js configuration
-├── tailwind.config.ts            # Tailwind CSS config
-├── tsconfig.json                 # TypeScript configuration
-└── package.json                  # Project dependencies
+├── app/
+│   ├── admin-dashboard/        # Admin panel (issues + user management + performance)
+│   ├── client-dashboard/       # Client issue submission and tracking
+│   ├── team-dashboard/         # Staff issue management
+│   ├── api/
+│   │   ├── auth/
+│   │   │   ├── login/          # POST /api/auth/login
+│   │   │   └── register/       # POST /api/auth/register
+│   │   ├── issues/             # GET, POST /api/issues
+│   │   │   └── [id]/           # PATCH, DELETE /api/issues/:id
+│   │   ├── users/              # GET /api/users (admin only)
+│   │   │   └── [id]/           # DELETE (toggle status) /api/users/:id
+│   │   └── staff/              # GET /api/staff (team members by category)
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx                # Landing / Login page
+├── components/
+│   └── ui/                     # 49 shadcn/ui components
+├── hooks/
+│   ├── use-auth.ts             # Auth state management
+│   └── use-issues.ts           # Issue CRUD hook
+├── lib/
+│   ├── mongodb.ts              # DB connection
+│   ├── auth.ts                 # JWT utilities
+│   ├── auth-edge.ts            # Edge-compatible JWT
+│   ├── assignment.ts           # Intelligent auto-assignment engine
+│   └── email.ts               # All email templates & Nodemailer setup
+├── models/
+│   ├── User.ts                 # User schema (id, name, email, role, department, categories, isActive)
+│   └── Issue.ts                # Issue schema (title, status, priority, assignedTo, createdBy, comments)
+├── scripts/                    # Utility & migration scripts
+├── middleware.ts               # JWT validation & route protection
+└── package.json
 ```
-
----
-
-## 👥 User Roles & Permissions
-
-### Client (Employee Access)
-**Use Case**: Regular employees who need to report issues
-
-**Permissions**:
-- ✅ Create new issues
-- ✅ View own issues
-- ✅ Add comments to own issues
-- ✅ Update profile information
-- ❌ Cannot view other users' issues
-- ❌ Cannot assign issues
-- ❌ Cannot access admin features
-
-**Dashboard Features**:
-- Personal issue tracker
-- Submit new issue form
-- Issue status overview
-- Comment history
-
----
-
-### Team Member (Technical Staff)
-**Use Case**: Technical staff who resolve issues with intelligent automated assignment
-
-**How Assignment Works**:
-- Issues are **automatically assigned** by the Intelligent Assignment Engine
-- Assignment is based on **priority-weighted performance metrics**:
-  - Historical resolution time efficiency
-  - Current workload capacity
-  - Category expertise and specialization
-  - Success rate on critical issues
-  - Real-time availability status
-- **Gmail notifications** sent immediately upon assignment
-
-**Permissions**:
-- ✅ View automatically assigned issues
-- ✅ View all issues in their specialized categories
-- ✅ Update issue status and priority
-- ✅ Add comments and collaborate with team members
-- ✅ Set due dates and track progress
-- ✅ View personal performance metrics
-- ❌ Cannot manually assign issues (automated by system)
-- ❌ Cannot manage users
-- ❌ Cannot access full system analytics
-
-**Category Specialization**: During registration, team members select expertise areas:
-- Infrastructure
-- IT/Technical
-- Portal
-- HR
-- Facilities
-- Finance
-- Security
-- Operations
-- Support
-- Policy
-
-**Dashboard Features**:
-- Automatically assigned issue queue
-- Category-filtered issue list
-- Real-time status update interface
-- Performance metrics dashboard showing:
-  - Personal efficiency score
-  - Average resolution time
-  - Issue quality ratings
-  - Workload capacity
-- Collaboration and comment tools
-- Gmail notification history
-
----
-
-### Admin (System Administrator)
-**Use Case**: System administrators with full access
-
-**Permissions**:
-- ✅ Full access to all issues
-- ✅ Create, read, update, delete any issue
-- ✅ User management (activate/deactivate)
-- ✅ Assign issues to team members
-- ✅ Access to all analytics and reports
-- ✅ System configuration
-- ✅ Audit trail access
-
-**Dashboard Features**:
-- Comprehensive analytics dashboard
-- User management panel
-- System-wide issue overview
-- Advanced filtering and search
-- Export capabilities
-- Performance reports
-- Trend analysis
 
 ---
 
 ## 📡 API Documentation
 
-### Authentication Endpoints
+### Auth
 
-#### Register User
+#### Register
 ```http
 POST /api/auth/register
 Content-Type: application/json
 
 {
   "email": "user@example.com",
-  "password": "securePassword123",
+  "password": "securePassword",
   "role": "client|team|admin",
   "name": "John Doe",
   "department": "IT/Technical",
-  "categories": ["Infrastructure", "IT/Technical"]  // For team members only
+  "categories": ["IT/Technical", "Infrastructure"]  // team role only
 }
 ```
-
-**Response**:
-```json
-{
-  "success": true,
-  "token": "jwt-token-here",
-  "user": {
-    "_id": "user-id",
-    "email": "user@example.com",
-    "role": "client",
-    "name": "John Doe"
-  }
-}
-```
-
----
 
 #### Login
 ```http
 POST /api/auth/login
 Content-Type: application/json
 
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "token": "jwt-token-here",
-  "user": {
-    "_id": "user-id",
-    "email": "user@example.com",
-    "role": "client",
-    "name": "John Doe",
-    "department": "IT/Technical"
-  }
-}
+{ "email": "user@example.com", "password": "securePassword" }
 ```
 
 ---
 
-### Issue Endpoints
+### Issues
+
+#### Get Issues
+```http
+GET /api/issues?status=Open&category=HR
+```
+Returns issues filtered by role (clients see own, staff see assigned, admin sees all).
 
 #### Create Issue
 ```http
 POST /api/issues
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "title": "Server downtime in Building A",
-  "description": "Main server in Building A is not responding",
-  "category": "Infrastructure",
-  "priority": "Critical",
-  "tags": ["server", "urgent"]
-}
+{ "title": "...", "description": "...", "category": "HR", "priority": "High" }
 ```
-
----
-
-#### Get All Issues
-```http
-GET /api/issues
-Authorization: Bearer <token>
-```
-
-**Query Parameters**:
-- `status`: Filter by status (Open, In Progress, Resolved, Closed)
-- `category`: Filter by category
-- `priority`: Filter by priority
-- `assignedTo`: Filter by assigned user ID
-
----
+Triggers auto-assignment and sends emails.
 
 #### Update Issue
 ```http
 PATCH /api/issues/:id
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "status": "In Progress",
-  "priority": "High",
-  "assignedTo": "team-member-id"
-}
+{ "status": "Resolved" }
 ```
+Triggers status update email to client.
 
----
-
-#### Add Comment
+#### Delete Issue (Admin only)
 ```http
-POST /api/issues/:id/comments
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "text": "Working on this issue now"
-}
+DELETE /api/issues/:id
 ```
 
 ---
 
-### User Endpoints
+### Users
 
 #### Get All Users (Admin only)
 ```http
 GET /api/users
-Authorization: Bearer <token>
 ```
 
----
+#### Toggle User Active Status (Admin only)
+```http
+DELETE /api/users/:id
+```
+Toggles `isActive`. If deactivating, sends warning email to the user and unassigns them from issues.
 
 #### Get Staff Members
 ```http
 GET /api/staff
-Authorization: Bearer <token>
 ```
+Returns team members filterable by category.
 
-Returns all team members with their assigned categories.
+---
+
+## 🔒 Security
+
+- **JWT tokens** stored in secure httpOnly cookies
+- **Password hashing** with bcryptjs (10 rounds)
+- **Role-based access control** enforced at both middleware and API route level
+- **Admin self-protection**: Admin cannot deactivate their own account
+- **Input validation** with Zod on all forms
+- **Mongoose sanitization** prevents NoSQL injection
+
+### Production Security Checklist
+- [ ] Use a strong `JWT_SECRET` (32+ characters)
+- [ ] Enable HTTPS only
+- [ ] Whitelist MongoDB IPs
+- [ ] Set `Secure` and `SameSite` cookie flags
+- [ ] Rotate Gmail refresh token regularly
+- [ ] Implement API rate limiting
 
 ---
 
 ## 🔧 Scripts & Utilities
 
-The project includes several utility scripts in the `/scripts` directory:
-
-### Database Management
-
-#### Seed Database
-```bash
-npm run seed
-```
-Creates sample users and issues for development/testing.
-
-#### Cleanup Test Data
-```bash
-node scripts/cleanup-test-data.js
-```
-Removes all test data from the database.
-
----
-
-### User Management
-
-#### Fix Legacy Users
-```bash
-node scripts/fix-legacy-users.js
-```
-Migrates old user format to new schema.
-
-#### Verify Users
-```bash
-node scripts/verify-users.js
-```
-Checks database for user data integrity.
-
-#### Fix Production Users
-```bash
-node scripts/fix-production-users.js
-```
-Updates production user records with new fields.
-
----
-
-### Email Configuration
-
-#### Get Gmail Refresh Token
-```bash
-node scripts/get-refresh-token.js
-```
-Interactive script to obtain Gmail OAuth2 refresh token for email notifications.
-
----
-
-### Testing Scripts
-
-#### Verify Assignment
-```bash
-node scripts/verify-assignment.js
-```
-Checks issue assignment logic.
-
-#### Seed Assignment Test
-```bash
-node scripts/seed-assignment-test.js
-```
-Creates test data for assignment workflow testing.
+| Script | Command | Purpose |
+|--------|---------|---------|
+| Seed database | `npm run seed` | Create sample users and issues |
+| Cleanup test data | `node scripts/cleanup-test-data.js` | Remove all test data |
+| Fix legacy users | `node scripts/fix-legacy-users.js` | Migrate old user schema |
+| Verify users | `node scripts/verify-users.js` | Check data integrity |
+| Fix production users | `node scripts/fix-production-users.js` | Update prod records |
+| Gmail token | `node scripts/get-refresh-token.js` | Get OAuth2 refresh token |
+| Verify assignment | `node scripts/verify-assignment.js` | Test assignment logic |
+| Seed assignment test | `node scripts/seed-assignment-test.js` | Create assignment test data |
 
 ---
 
@@ -678,115 +567,38 @@ Creates test data for assignment workflow testing.
 
 ### Vercel (Recommended)
 
-1. **Push your code to GitHub**
+1. Push to GitHub
+2. Import project at [vercel.com](https://vercel.com)
+3. Add all environment variables from `.env.local`
+4. Set `NEXTAUTH_URL` to your production domain
+5. Deploy ✅
 
-2. **Import to Vercel**
-   - Visit [vercel.com](https://vercel.com)
-   - Click "Import Project"
-   - Select your repository
+### Manual / Docker
 
-3. **Configure Environment Variables**
-   - Add all variables from `.env.local`
-   - Ensure `NEXTAUTH_URL` points to your production domain
-
-4. **Deploy**
-   - Vercel will automatically build and deploy
-   - Your app will be live at `your-project.vercel.app`
-
-### Other Platforms
-
-#### Manual Deployment
 ```bash
-# Build the project
+# Build
 npm run build
 
-# Start production server
+# Start
 npm start
 ```
 
-#### Docker (Optional)
-Create a `Dockerfile`:
 ```dockerfile
 FROM node:18-alpine
-
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 COPY . .
 RUN npm run build
-
 EXPOSE 3000
 CMD ["npm", "start"]
 ```
-
-Build and run:
-```bash
-docker build -t issue-tracker .
-docker run -p 3000:3000 --env-file .env.local issue-tracker
-```
-
----
-
-## 🔒 Security
-
-### Authentication & Authorization
-- **JWT tokens** stored securely in httpOnly cookies
-- **Password hashing** using bcryptjs (10 rounds)
-- **Role-based access control** enforced at API level
-- **Middleware protection** for all dashboard routes
-
-### Best Practices Implemented
-- ✅ Environment variables for sensitive data
-- ✅ Input validation with Zod schemas
-- ✅ SQL injection prevention via Mongoose
-- ✅ XSS protection with React's built-in escaping
-- ✅ CSRF protection via Next.js
-- ✅ Rate limiting (configure as needed)
-
-### Security Checklist for Production
-- [ ] Use strong `JWT_SECRET` (min 32 characters)
-- [ ] Enable HTTPS only in production
-- [ ] Set secure cookie flags
-- [ ] Implement rate limiting on auth endpoints
-- [ ] Regular dependency updates
-- [ ] Enable MongoDB IP whitelisting
-- [ ] Use environment-specific configurations
-- [ ] Implement audit logging
-- [ ] Regular security audits
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Commit your changes**
-   ```bash
-   git commit -m 'Add some amazing feature'
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
-
-### Coding Standards
-- Use TypeScript for type safety
-- Follow ESLint rules
-- Write meaningful commit messages
-- Add comments for complex logic
-- Update documentation for new features
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ---
 
@@ -795,6 +607,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **Author**: Vaibhav Saini
 - **GitHub**: [@VSaini11](https://github.com/VSaini11)
 - **Repository**: [Issue-Tracking-web-app](https://github.com/VSaini11/Issue-Tracking-web-app)
+- **Email**: vaibhavsaini709@gmail.com
 
 For bugs and feature requests, please [open an issue](https://github.com/VSaini11/Issue-Tracking-web-app/issues).
 
@@ -802,12 +615,13 @@ For bugs and feature requests, please [open an issue](https://github.com/VSaini1
 
 ## 🙏 Acknowledgments
 
-- [Next.js](https://nextjs.org/) - React framework
-- [shadcn/ui](https://ui.shadcn.com/) - UI component library
-- [Radix UI](https://www.radix-ui.com/) - Primitive components
-- [Tailwind CSS](https://tailwindcss.com/) - CSS framework
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Vercel](https://vercel.com/) - Hosting platform
+- [Next.js](https://nextjs.org/) — React framework
+- [shadcn/ui](https://ui.shadcn.com/) — UI component library
+- [Radix UI](https://www.radix-ui.com/) — Accessible primitive components
+- [Tailwind CSS](https://tailwindcss.com/) — CSS framework
+- [MongoDB](https://www.mongodb.com/) — Database
+- [Nodemailer](https://nodemailer.com/) — Email service
+- [Vercel](https://vercel.com/) — Hosting platform
 
 ---
 

@@ -1,7 +1,7 @@
 // JWT utilities that work in Edge Runtime
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
-export async function verifyTokenEdge(token: string): Promise<{ userId: string; email: string; role: string } | null> {
+export async function verifyTokenEdge(token: string): Promise<{ userId: string; email: string; role: string; tenantId: string } | null> {
   try {
     // Split the JWT token
     const parts = token.split('.')
@@ -43,7 +43,8 @@ export async function verifyTokenEdge(token: string): Promise<{ userId: string; 
     return {
       userId: decodedPayload.userId,
       email: decodedPayload.email,
-      role: decodedPayload.role
+      role: decodedPayload.role,
+      tenantId: decodedPayload.tenantId
     }
   } catch (error) {
     return null

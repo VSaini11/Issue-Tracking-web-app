@@ -21,6 +21,9 @@ export default function LoginPage() {
   const [name, setName] = useState("")
   const [department, setDepartment] = useState("")
   const [categories, setCategories] = useState<string[]>([])
+  const [companyName, setCompanyName] = useState("")
+  const [companyWebsite, setCompanyWebsite] = useState("")
+  const [companyLogo, setCompanyLogo] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -66,6 +69,17 @@ export default function LoginPage() {
     }
   }
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setCompanyLogo(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -91,7 +105,7 @@ export default function LoginPage() {
       return
     }
 
-    const result = await register(email, password, role, name, department, categories)
+    const result = await register(email, password, role, name, department, categories, companyName, companyWebsite, companyLogo)
 
     if (!result.success) {
       setError(result.error || "Registration failed")
@@ -370,6 +384,66 @@ export default function LoginPage() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {role === 'admin' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-company" className="text-slate-700 font-medium font-bold">
+                          Company / Organization Name
+                        </Label>
+                        <Input
+                          id="signup-company"
+                          type="text"
+                          placeholder="Vybex Solutions"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          className="h-12 border-slate-300 focus:border-slate-900 focus:ring-slate-900"
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-website" className="text-slate-700 font-medium font-bold">
+                          Company Website (Optional)
+                        </Label>
+                        <Input
+                          id="signup-website"
+                          type="url"
+                          placeholder="https://vybex.com"
+                          value={companyWebsite}
+                          onChange={(e) => setCompanyWebsite(e.target.value)}
+                          className="h-12 border-slate-300 focus:border-slate-900 focus:ring-slate-900"
+                          disabled={loading}
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="signup-logo" className="text-slate-700 font-medium font-bold">
+                          Organization Logo
+                        </Label>
+                        <div className="flex items-center gap-5 p-4 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-all">
+                          <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center border border-slate-200 shadow-sm overflow-hidden shrink-0">
+                            {companyLogo ? (
+                              <img src={companyLogo} alt="Logo Preview" className="w-full h-full object-contain" />
+                            ) : (
+                              <Building2 className="h-8 w-8 text-slate-300" />
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Brand Logo</p>
+                            <Input
+                              id="signup-logo"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="h-9 text-[10px] bg-white border-slate-200 cursor-pointer file:mr-2 file:py-0 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-slate-900 file:text-white"
+                              disabled={loading}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <Button
                     type="submit"

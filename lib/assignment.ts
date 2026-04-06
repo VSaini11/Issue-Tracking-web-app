@@ -26,12 +26,13 @@ function getWeight(priority: string): number {
  * Calculates the efficiency of a staff member for a specific category.
  * Efficiency (%) = (Sum of priority-weighted resolved issues / Sum of priority-weighted assigned issues) * 100
  */
-export async function calculateEfficiency(userId: string, category: string): Promise<number> {
+export async function calculateEfficiency(userId: string, category: string, tenantId: string): Promise<number> {
     // Fetch all issues assigned to this user in this category
     // We need to fetch fields: priority, status
     const issues = await Issue.find({
         assignedTo: userId,
-        category: category
+        category: category,
+        tenantId: tenantId
     }).select('priority status')
 
     if (!issues || issues.length === 0) {
@@ -62,10 +63,11 @@ export async function calculateEfficiency(userId: string, category: string): Pro
 /**
  * Gets the number of active issues (Open, In Progress) for a user
  */
-export async function getActiveIssueCount(userId: string): Promise<number> {
+export async function getActiveIssueCount(userId: string, tenantId: string): Promise<number> {
     const count = await Issue.countDocuments({
         assignedTo: userId,
-        status: { $in: ['Open', 'In Progress'] }
+        status: { $in: ['Open', 'In Progress'] },
+        tenantId: tenantId
     })
     return count
 }
@@ -77,13 +79,17 @@ export async function getActiveIssueCount(userId: string): Promise<number> {
  * 3. Pick highest efficiency that is not busy.
  * 4. Fallback: least busy.
  */
-export async function findBestStaffForIssue(category: string): Promise<string | null> {
-    // 1. Identify all technical staff belonging to that category
+export async function findBestStaffForIssue(category: string, tenantId: string, priority?: string): Promise<string | null> {
+    // 1. Identify all technical staff belonging to that category and the same tenant
     // Note: 'team' role is assumed to be technical staff
     const staffMembers = await User.find({
         role: 'team',
-        categories: category,
-        isActive: true
+        isActive: true,
+        tenantId: tenantId,
+        $or: [
+            { department: category },
+            { categories: category }
+        ]
     }).select('_id name')
 
     if (!staffMembers || staffMembers.length === 0) {
@@ -94,8 +100,8 @@ export async function findBestStaffForIssue(category: string): Promise<string | 
     const candidates: StaffEfficiency[] = []
 
     for (const staff of staffMembers) {
-        const efficiency = await calculateEfficiency(staff._id.toString(), category)
-        const activeIssues = await getActiveIssueCount(staff._id.toString())
+        const efficiency = await calculateEfficiency(staff._id.toString(), category, tenantId)
+        const activeIssues = await getActiveIssueCount(staff._id.toString(), tenantId)
 
         candidates.push({
             userId: staff._id.toString(),
@@ -112,7 +118,15 @@ export async function findBestStaffForIssue(category: string): Promise<string | 
 
     // 4. Assign to most efficient available staff
     for (const candidate of candidates) {
-        if (candidate.activeIssues < MAX_ACTIVE_ISSUES) {
+        // Critical issues bypass the "busy" threshold entirely
+        if (priority === 'Critical') {
+            return candidate.userId
+        }
+
+        // High priority issues allow a slightly higher threshold
+        const threshold = priority === 'High' ? MAX_ACTIVE_ISSUES + 1 : MAX_ACTIVE_ISSUES
+
+        if (candidate.activeIssues < threshold) {
             return candidate.userId
         }
     }

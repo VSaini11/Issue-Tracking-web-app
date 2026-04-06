@@ -211,12 +211,26 @@ export default function ClientDashboard() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden">
+                {user.companyLogo ? (
+                  <img src={user.companyLogo} alt="Logo" className="w-full h-full object-contain p-1" />
+                ) : (
+                  <Building2 className="h-6 w-6 text-white" />
+                )}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Client Portal</h1>
-                <p className="text-sm text-slate-600">Issue Reporting & Status Tracking</p>
+                <h1 className="text-xl font-bold text-slate-900">{user.companyName || 'Client Portal'}</h1>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-slate-600">{user.companyName ? 'Client Portal' : 'Issue Reporting & Status Tracking'}</p>
+                  {user.companyWebsite && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <a href={user.companyWebsite} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline font-medium">
+                        {user.companyWebsite.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                      </a>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -320,15 +334,15 @@ export default function ClientDashboard() {
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="Infrastructure">Infrastructure</SelectItem>
-                <SelectItem value="IT/Technical">IT/Technical</SelectItem>
-                <SelectItem value="Portal">Portal</SelectItem>
-                <SelectItem value="HR">HR</SelectItem>
-                <SelectItem value="Facilities">Facilities</SelectItem>
-                <SelectItem value="Finance">Finance</SelectItem>
-                <SelectItem value="Security">Security</SelectItem>
+                <SelectItem value="IT/Technical">IT/Technical Support</SelectItem>
+                <SelectItem value="Portal">Portal / Website</SelectItem>
+                <SelectItem value="Human Resources">Human Resources</SelectItem>
+                <SelectItem value="Administration">Administration</SelectItem>
+                <SelectItem value="Accounts / Finance">Accounts / Finance</SelectItem>
+                <SelectItem value="Security / Compliance">Security / Compliance</SelectItem>
                 <SelectItem value="Operations">Operations</SelectItem>
-                <SelectItem value="Support">Support</SelectItem>
-                <SelectItem value="Policy">Policy</SelectItem>
+                <SelectItem value="Internal Helpdesk">Internal Helpdesk</SelectItem>
+                <SelectItem value="Management">Management / Policy</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -377,14 +391,14 @@ export default function ClientDashboard() {
                     <SelectContent>
                       <SelectItem value="Infrastructure">Infrastructure Issues</SelectItem>
                       <SelectItem value="IT/Technical">IT/Technical Support</SelectItem>
-                      <SelectItem value="Portal">Portal/Website Issues</SelectItem>
-                      <SelectItem value="HR">Human Resources</SelectItem>
-                      <SelectItem value="Facilities">Facilities / Administration</SelectItem>
-                      <SelectItem value="Finance">Finance / Accounts</SelectItem>
-                      <SelectItem value="Security">Security / Compliance</SelectItem>
+                      <SelectItem value="Portal">Portal / Website Issues</SelectItem>
+                      <SelectItem value="Human Resources">Human Resources / HR</SelectItem>
+                      <SelectItem value="Administration">Administration / Facilities</SelectItem>
+                      <SelectItem value="Accounts / Finance">Accounts / Finance</SelectItem>
+                      <SelectItem value="Security / Compliance">Security / Compliance</SelectItem>
                       <SelectItem value="Operations">Operations</SelectItem>
-                      <SelectItem value="Support">Internal Helpdesk</SelectItem>
-                      <SelectItem value="Policy">Policy / Management</SelectItem>
+                      <SelectItem value="Internal Helpdesk">Internal Helpdesk / Support</SelectItem>
+                      <SelectItem value="Management">Management / Policy</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

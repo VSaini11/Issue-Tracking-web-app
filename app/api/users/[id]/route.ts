@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb'
 import User from '@/models/User'
 import Issue from '@/models/Issue'
 import { verifyTokenEdge } from '@/lib/auth-edge'
+import { sendUserDeactivationEmail } from '@/lib/email'
 
 // Toggle user active status (deactivate/activate)
 export async function DELETE(
@@ -29,8 +30,8 @@ export async function DELETE(
 
     const { id } = await params
 
-    // Check if user exists
-    const user = await User.findById(id)
+    // Check if user exists and belongs to the same tenant
+    const user = await User.findOne({ _id: id, tenantId: decoded.tenantId })
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
@@ -45,12 +46,19 @@ export async function DELETE(
     
     await User.findByIdAndUpdate(id, { isActive: newActiveStatus })
     
-    // If deactivating user, unassign them from any issues
+    // If deactivating user, unassign them from any issues within the same tenant
     if (!newActiveStatus) {
       await Issue.updateMany(
-        { assignedTo: id },
+        { assignedTo: id, tenantId: decoded.tenantId },
         { $unset: { assignedTo: 1 } }
       )
+      
+      // Send warning email to deactivated user
+      try {
+        await sendUserDeactivationEmail(user.email, user.name)
+      } catch (err) {
+        console.error('Failed to send deactivation email:', err)
+      }
     }
 
     return NextResponse.json({ 
@@ -68,7 +76,7 @@ export async function DELETE(
   }
 }
 
-// Update user (for future use)
+// Update user (PUT)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -97,9 +105,10 @@ export async function PUT(
     // Remove sensitive fields from updates
     delete updates.password
     delete updates._id
+    delete updates.tenantId // Prevent changing tenantId
 
-    const user = await User.findByIdAndUpdate(
-      id,
+    const user = await User.findOneAndUpdate(
+      { _id: id, tenantId: decoded.tenantId },
       updates,
       { new: true, runValidators: true }
     ).select('-password')

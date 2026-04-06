@@ -7,7 +7,14 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect()
 
-    const { email, password, role, name, department, categories } = await request.json()
+    const { email, password, role, name, department, categories, companyName, companyWebsite, companyLogo } = await request.json()
+    console.log('--- REGISTER ATTEMPT ---')
+    console.log('Role:', role)
+    console.log('Name:', name)
+    console.log('Company:', companyName)
+    console.log('Website:', companyWebsite)
+    console.log('Logo size:', companyLogo ? companyLogo.length : 0)
+    console.log('------------------------')
 
     // Check if user already exists
     const existingUser = await User.findOne({ email })
@@ -21,18 +28,40 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password)
 
-    // Create user
+    // Create user with a generated tenantId for new organizations
+    // Check if an organization with this name already exists to share the tenantId
+    let finalTenantId = `org_${Math.random().toString(36).substr(2, 9)}`
+    let finalCompanyLogo = companyLogo
+    let finalCompanyWebsite = companyWebsite
+
+    if (companyName) {
+      const existingOrgUser = await User.findOne({ 
+        companyName: { $regex: new RegExp(`^${companyName.trim()}$`, 'i') } 
+      })
+      
+      if (existingOrgUser && existingOrgUser.tenantId) {
+        finalTenantId = existingOrgUser.tenantId
+        // Inherit branding if not provided
+        if (!finalCompanyLogo) finalCompanyLogo = existingOrgUser.companyLogo
+        if (!finalCompanyWebsite) finalCompanyWebsite = existingOrgUser.companyWebsite
+        console.log(`User joining existing organization: ${companyName} (Tenant: ${finalTenantId})`)
+      }
+    }
+
     const user = await User.create({
       email,
       password: hashedPassword,
-      role,
       name,
-      department: department || '',
-      categories: categories || [],
+      role: 'admin',
+      tenantId: finalTenantId,
+      companyName: companyName || '',
+      companyWebsite: finalCompanyWebsite || '',
+      companyLogo: finalCompanyLogo || '',
+      isActive: true
     })
 
-    // Generate token
-    const token = generateToken(user._id.toString(), user.email, user.role)
+    // Generate token with tenantId
+    const token = generateToken(user._id.toString(), user.email, user.role, user.tenantId)
 
     // Set cookie
     const response = NextResponse.json({
@@ -44,6 +73,10 @@ export async function POST(request: NextRequest) {
         name: user.name,
         department: user.department,
         categories: user.categories,
+        tenantId: user.tenantId,
+        companyName: user.companyName,
+        companyWebsite: user.companyWebsite,
+        companyLogo: user.companyLogo,
       },
     })
 

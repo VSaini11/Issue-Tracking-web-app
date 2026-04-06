@@ -7,6 +7,10 @@ interface User {
   role: string
   name: string
   department: string
+  avatar?: string
+  companyName?: string
+  companyWebsite?: string
+  companyLogo?: string
 }
 
 export const useAuth = () => {
@@ -20,7 +24,8 @@ export const useAuth = () => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me')
+      // Add a timestamp to avoid browser caching of the auth response
+      const response = await fetch(`/api/auth/me?t=${Date.now()}`)
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
@@ -66,14 +71,34 @@ export const useAuth = () => {
     }
   }
 
-  const register = async (email: string, password: string, role: string, name: string, department?: string, categories?: string[]) => {
+  const register = async (
+    email: string, 
+    password: string, 
+    role: string, 
+    name: string, 
+    department?: string, 
+    categories?: string[],
+    companyName?: string,
+    companyWebsite?: string,
+    companyLogo?: string
+  ) => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role, name, department, categories }),
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          role, 
+          name, 
+          department, 
+          categories, 
+          companyName, 
+          companyWebsite, 
+          companyLogo 
+        }),
       })
 
       const data = await response.json()

@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
     // Build query based on user role
     const query: Record<string, any> = {}
 
+    // Always filter by tenantId
+    query.tenantId = decoded.tenantId
+
     // If client, only show their issues
     if (decoded.role === 'client') {
       query.createdBy = decoded.userId
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
       // Team members can view only the issues assigned to them
       query.assignedTo = decoded.userId
     }
-    // Admin sees all issues (no additional filtering)
+    // Admin sees all issues in their tenant (no additional filtering)
 
     // Apply filters
     if (status && status !== 'all') {
@@ -52,9 +55,9 @@ export async function GET(request: NextRequest) {
     }
 
     const issues = await Issue.find(query)
-      .populate('createdBy', 'name email')
-      .populate('assignedTo', 'name email')
-      .populate('comments.author', 'name email')
+      .populate('createdBy', '_id name email')
+      .populate('assignedTo', '_id name email')
+      .populate('comments.author', '_id name email')
       .sort({ createdAt: -1 })
 
     return NextResponse.json({ issues })
@@ -89,7 +92,7 @@ export async function POST(request: NextRequest) {
     // Auto-assignment logic if no staff is manually selected
     if (!finalAssignedTo) {
       try {
-        finalAssignedTo = await findBestStaffForIssue(category)
+        finalAssignedTo = await findBestStaffForIssue(category, decoded.tenantId, priority)
       } catch (err) {
         console.error('Auto-assignment failed:', err)
         // Fallback to null (unassigned) if auto-assignment crashes
@@ -105,6 +108,7 @@ export async function POST(request: NextRequest) {
       assignedTo: finalAssignedTo || null,
       dueDate: dueDate || null,
       tags: tags || [],
+      tenantId: decoded.tenantId,
     })
 
     await issue.populate('createdBy', 'name email')
