@@ -1,6 +1,6 @@
 # IssueTracker Pro 🎯
 
-**Intelligent Issue Tracking & Assignment System** — A full-stack issue resolution platform with automated staff assignment, real-time email notifications, performance analytics, and a comprehensive admin control panel.
+**Advanced Multi-Tenant SaaS Issue Tracking & Assignment System** — A scalable platform for organizations to manage professional support and internal issues with complete data isolation, automated staff assignment, and branded company dashboards.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
@@ -31,21 +31,24 @@
 
 ## 🎯 Overview
 
-**IssueTracker Pro** is a multi-role issue tracking and resolution platform built for teams and organizations. It automates the entire issue lifecycle — from submission to resolution — using intelligent staff assignment algorithms, priority-weighted performance metrics, and real-time Gmail email notifications.
+**IssueTracker Pro** is a high-performance **Multi-Tenant SaaS** platform designed for professional organizations. Unlike traditional single-tenant systems, it allows multiple companies to operate on the same infrastructure while ensuring **strict data isolation** via `tenantId` partitioning.
 
-The system features three separate role-based dashboards (Client, Staff, Admin), a fully automated issue routing engine, live performance scoring, reward eligibility tracking, and a rich admin control panel with user management capabilities.
+The system automates the entire issue lifecycle within each organization — from submission to resolution — using tenant-aware assignment algorithms, priority-weighted metrics, and custom-branded notifications.
 
-### Key Highlights
+### 🏢 Multi-Tenant Architecture
+- **Data Isolation**: All Users, Issues, and Meetings are logically partitioned by `tenantId`.
+- **Organization Branding**: Each tenant has its own Company Name, Website, and Logo which dynamically updates the dashboard experience.
+- **Shared Infrastructure, Private Data**: Multiple organizations can register and coexist securely with zero cross-tenant data leakage.
 
 | Feature | Description |
 |---------|-------------|
-| 🤖 Auto-Assignment Engine | Issues are routed to the best-fit staff based on category expertise and priority-weighted efficiency scores |
-| 📊 Staff Performance Reports | Admins can view any staff member's issue metrics and performance score over the last 60 days |
-| 🏆 Reward Eligibility | Staff with ≥ 90% performance score are automatically flagged as eligible for rewards |
-| 📧 Email Notifications | Automated emails for issue assignment, status changes, and account deactivation |
-| 👥 Separated User Management | Admin sees Administrators, Staff, and Clients in three distinct sections |
-| 🔐 Role-Based Access Control | JWT-based auth with full RBAC for Client, Staff, and Admin roles |
-| 🎨 Hover Info Cards | Hovering over staff names shows their unique ID, department, and handled categories |
+| 🌐 Multi-Tenant Isolation | Secure data partitioning ensuring each organization only sees its own users, issues, and analytics |
+| 🤖 Auto-Assignment Engine | Domain-aware routing that matches issues to best-fit staff *within* the specific organization |
+| 🎨 Branded Dashboards | Custom company logos and branding elements for a personalized organization experience |
+| 📊 Staff Performance Reports | Tenant-scoped performance metrics with live scoring over 60-day rolling windows |
+| 🏆 Reward Eligibility | Automated tracking for high-performing staff members (score ≥ 90%) |
+| 📧 Smart Notifications | Real-time email updates for assignments, status changes, and account management |
+| 🔐 Advanced RBAC | Industry-standard JWT authentication with granular role-based access control |
 
 ---
 
@@ -53,15 +56,19 @@ The system features three separate role-based dashboards (Client, Staff, Admin),
 
 This section explains the full lifecycle of the system from registration to issue resolution.
 
-### Step 1 — User Registration
+### Step 1 — Organization Registration & User Joining
 
-Users register with one of three roles:
+Users can either **Create a New Organization** or **Join an Existing One**:
 
-- **Client** — Employees who submit issues
-- **Team (Staff)** — Technical staff who resolve issues. They **select their category expertise** (e.g., IT/Technical, HR, Finance) during registration. This data is stored with their profile and used for smart auto-assignment.
-- **Admin** — System administrators with full control
+- **Creating an Org**: An Admin registers with a `companyName`. The system generates a unique `tenantId` and establishes the organization's branding (logo/website).
+- **Joining an Org**: By providing an existing `companyName`, users are automatically grouped into the same tenant ecosystem.
 
-Each user is assigned a **unique MongoDB `_id`** at registration, serving as their permanent system identifier. The short version (last 6 characters, uppercase) is displayed in the admin dashboard hover cards.
+**Available Roles**:
+- **Team (Staff)** — Technical experts who resolve issues within their organization. They select **category expertise** (e.g., IT, HR, Finance) during registration.
+- **Client** — Employees within the organization who report issues.
+- **Admin** — Controls the organization-specific dashboard and user management.
+
+Every record is tagged with a `tenantId` to enforce strict security boundaries.
 
 ---
 
@@ -320,7 +327,7 @@ Located in `lib/assignment.ts`, this engine runs every time a new issue is creat
 
 ### Staff Capacity Rule
 - A staff member is considered **available** if they have fewer than **3 active (Open or In Progress) issues**
-- This prevents overloading high-performing staff and ensures fair distribution
+- This prevents overloading high-performing staff and ensures fair distribution within the organization
 
 ---
 
@@ -441,8 +448,9 @@ issue-tracking-portal/
 │   ├── assignment.ts           # Intelligent auto-assignment engine
 │   └── email.ts               # All email templates & Nodemailer setup
 ├── models/
-│   ├── User.ts                 # User schema (id, name, email, role, department, categories, isActive)
-│   └── Issue.ts                # Issue schema (title, status, priority, assignedTo, createdBy, comments)
+│   ├── User.ts                 # User schema (id, tenantId, role, companyName, companyLogo, isActive)
+│   ├── Issue.ts                # Issue schema (title, tenantId, status, priority, assignedTo, createdBy)
+│   └── Meeting.ts              # Meeting schema (tenantId, adminId, schedule, link)
 ├── scripts/                    # Utility & migration scripts
 ├── middleware.ts               # JWT validation & route protection
 └── package.json
@@ -460,14 +468,18 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "admin@company.com",
   "password": "securePassword",
-  "role": "client|team|admin",
-  "name": "John Doe",
-  "department": "IT/Technical",
-  "categories": ["IT/Technical", "Infrastructure"]  // team role only
+  "role": "admin",
+  "name": "Jane Smith",
+  "companyName": "TechCorp",
+  "companyWebsite": "https://techcorp.com",
+  "companyLogo": "base64_encoded_logo"
 }
 ```
+
+> [!NOTE]
+> If a `companyName` already exists, the user will be joined to that organization's `tenantId`.
 
 #### Login
 ```http
